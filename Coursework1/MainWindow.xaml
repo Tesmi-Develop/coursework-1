@@ -19,7 +19,6 @@
             <MenuItem Header="Штрафы">
                 <MenuItem Header="Добавить" Click="AddFine_Click" />
                 <MenuItem Header="Удалить выбранное" />
-                <MenuItem Header="Отчёт" />
             </MenuItem>
         </Menu>
 
