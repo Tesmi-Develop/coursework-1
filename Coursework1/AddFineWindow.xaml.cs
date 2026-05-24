@@ -23,39 +23,38 @@ public partial class AddFineWindow : Window
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        DialogResult = true;
-        
         if (string.IsNullOrWhiteSpace(ViolationTitleBox.Text))
         {
-            ErrorMessage = "Введите описание нарушения";
+            ErrorWindow.Show(this, "Введите описание нарушения");
             return;
         }
         
         if (!ViolationDatePicker.SelectedDate.HasValue)
         {
-            ErrorMessage = "Выберите дату нарушения";
+            ErrorWindow.Show(this, "Выберите дату нарушения");
             return;
         }
         
         if (!int.TryParse(AmountBox.Text, out var amount) || amount <= 0)
         {
-            ErrorMessage = "Введите корректную сумму штрафа";
+            ErrorWindow.Show(this, "Введите корректную сумму штрафа");
             return;
         }
 
         if (!DriverLicenseParser.TryParse(VuBox.Text, out var license, out var error))
         {
-            ErrorMessage = error;
+            ErrorWindow.Show(this, error);
             return;
         }
 
         if (!_validateDriverLicense(license))
         {
-            ErrorMessage = "Данного водителя не существует в базе";
+            ErrorWindow.Show(this, "Данного водителя не существует в базе");
             return;
         }
         
         CreatedFine = new Fine(license, ViolationTitleBox.Text, amount, ViolationDatePicker.SelectedDate.Value);
+        DialogResult = true;
     }
     
     private void NumberValidationTextBox(object sender, System.Windows.Input.TextCompositionEventArgs e)

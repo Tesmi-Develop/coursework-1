@@ -71,6 +71,8 @@
                     <DataGrid ItemsSource="{Binding Drivers}" 
                               CanUserResizeColumns="False" 
                               CanUserResizeRows="False"
+                              CanUserSortColumns="False"
+                              CanUserReorderColumns="False"
                               AutoGenerateColumns="False" 
                               IsReadOnly="True" 
                               Background="White"
@@ -99,6 +101,8 @@
                     <DataGrid ItemsSource="{Binding Fines}" 
                               CanUserResizeColumns="False" 
                               CanUserResizeRows="False"
+                              CanUserSortColumns="False"
+                              CanUserReorderColumns="False"
                               AutoGenerateColumns="False" 
                               IsReadOnly="True" 
                               Background="White">

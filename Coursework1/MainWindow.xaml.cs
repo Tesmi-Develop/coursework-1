@@ -47,14 +47,8 @@ public partial class MainWindow : Window
             Owner = this
         };
 
-        if (addWindow.ShowDialog() != true)
+        if (addWindow.ShowDialog() != true || !addWindow.IsSuccess)
             return;
-
-        if (!addWindow.IsSuccess)
-        {
-            ErrorWindow.Show(this, addWindow.ErrorMessage);
-            return;
-        }
         
         AddDriver(addWindow.CreatedDriver!.Value);
     }
@@ -81,14 +75,8 @@ public partial class MainWindow : Window
             Owner = this
         };
 
-        if (addWindow.ShowDialog() != true)
+        if (addWindow.ShowDialog() != true || !addWindow.IsSuccess)
             return;
-
-        if (!addWindow.IsSuccess)
-        {
-            ErrorWindow.Show(this, addWindow.ErrorMessage);
-            return;
-        }
         
         AddFine(addWindow.CreatedFine!.Value);
     }
