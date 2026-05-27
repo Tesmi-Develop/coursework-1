@@ -1,4 +1,4 @@
-﻿<Window x:Class="Coursework1.MainWindow"
+﻿<Window x:Class="Coursework1.UI.MainWindow"
         Language="ru-RU"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -12,9 +12,9 @@
             </MenuItem>
             <MenuItem Header="Водители">
                 <MenuItem Header="Добавить" Click="AddDriver_Click"/>
-                <MenuItem Header="Удалить выбранное" />
+                <MenuItem Header="Удалить выбранное" Click="RemoveDrivers_Click" />
                 <MenuItem Header="Отчёт" />
-                <MenuItem Header="Задать размер ХТ" />
+                <MenuItem Header="Задать размер ХТ" Click="SetHashTableCapacity_Click" />
             </MenuItem>
             <MenuItem Header="Штрафы">
                 <MenuItem Header="Добавить" Click="AddFine_Click" />
@@ -62,18 +62,19 @@
                     <Border DockPanel.Dock="Top" Background="#F3F3F3" BorderBrush="#DCDCDC" BorderThickness="0,0,0,1" Margin="0,0,0,5">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <TextBlock Text="Поиск по ВУ:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <TextBox Width="150" VerticalContentAlignment="Center"/>
-                            <Button Content="Найти" Margin="5,0" Padding="10,2"/>
+                            <TextBox x:Name="SearchInDrivers" Width="150" VerticalContentAlignment="Center"/>
+                            <Button Content="Найти" Margin="5,0" Padding="10,2" Click="FindDriver_Click"/>
                         </StackPanel>
                     </Border>
                     
-                    <DataGrid ItemsSource="{Binding Drivers}" 
+                    <DataGrid x:Name="DriversGrid" ItemsSource="{Binding Drivers}" 
                               CanUserResizeColumns="False" 
                               CanUserResizeRows="False"
                               CanUserSortColumns="False"
                               CanUserReorderColumns="False"
                               AutoGenerateColumns="False" 
-                              IsReadOnly="True" 
+                              IsReadOnly="True"
+                              SelectionMode="Extended"
                               Background="White"
                               ColumnHeaderHeight="30">
                         <DataGrid.Columns>
@@ -103,7 +104,8 @@
                               CanUserSortColumns="False"
                               CanUserReorderColumns="False"
                               AutoGenerateColumns="False" 
-                              IsReadOnly="True" 
+                              IsReadOnly="True"
+                              SelectionMode="Extended"
                               Background="White">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Серия/Номер ВУ" Binding="{Binding License}" Width="Auto"/>

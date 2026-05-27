@@ -1,4 +1,4 @@
-<Window x:Class="Coursework1.AddFineWindow"
+<Window x:Class="Coursework1.UI.AddFineWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Добавление штрафа" Height="400" Width="450" 

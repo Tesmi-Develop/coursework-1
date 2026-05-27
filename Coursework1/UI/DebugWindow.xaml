@@ -1,4 +1,4 @@
-<Window x:Class="Coursework1.DebugWindow"
+<Window x:Class="Coursework1.UI.DebugWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Отладка системы" Height="400" Width="600"

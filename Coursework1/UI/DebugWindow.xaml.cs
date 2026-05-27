@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace Coursework1;
+namespace Coursework1.UI;
 
 public partial class DebugWindow : Window
 {

@@ -3,7 +3,7 @@ using System.Windows;
 using Coursework1.Data;
 using Coursework1.Utilities;
 
-namespace Coursework1;
+namespace Coursework1.UI;
 
 public partial class AddFineWindow : Window
 {

@@ -1,4 +1,4 @@
-<Window x:Class="Coursework1.ReportWindow"
+<Window x:Class="Coursework1.UI.ReportWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Параметры отчёта" Height="320" Width="500" 
@@ -24,7 +24,7 @@
                  Width="150" HorizontalAlignment="Left"/>
 
         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,15,0,5">
-            <TextBlock Text="Дата нарушения (включительно):" Margin="0,0,0,8" Foreground="#333"/>
+            <TextBlock Text="Дата нарушений (включительно):" Margin="0,0,0,8" Foreground="#333"/>
             
             <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
                 <DatePicker x:Name="StartDatePicker" Width="150" VerticalAlignment="Center"/>

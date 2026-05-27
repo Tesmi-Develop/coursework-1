@@ -1,4 +1,4 @@
-<Window x:Class="Coursework1.AddRecordWindow"
+<Window x:Class="Coursework1.UI.AddRecordWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Добавление водителя" Height="350" Width="400" 

@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 
-namespace Coursework1;
+namespace Coursework1.UI;
 
 public partial class ReportWindow : Window
 {
