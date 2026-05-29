@@ -1,6 +1,6 @@
 namespace Coursework1.Data;
 
-public struct Fine
+public record struct Fine
 {
     public DriverLicense License { get; init; }
     public string Article { get; set; }

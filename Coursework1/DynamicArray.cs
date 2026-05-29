@@ -63,7 +63,6 @@ public class DynamicArray<T> : ICollection<T>
             Array.Copy(_items, index + 1, _items, index, _size - index);
         
         _items[_size] = default!;
-        
         return true;
     }
     
@@ -141,7 +140,7 @@ public class DynamicArray<T> : ICollection<T>
 
     public IEnumerator<T> GetEnumerator()
     {
-        for (int i = 0; i < _size; i++)
+        for (var i = 0; i < _size; i++)
         {
             yield return _items[i];
         }

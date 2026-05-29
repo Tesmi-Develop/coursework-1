@@ -4,9 +4,8 @@ using System.Windows.Input;
 
 namespace Coursework1.UI;
 
-public partial class ReportWindow : Window
+public partial class ReportWindow
 {
-    // Результат работы окна
     public ReportCriteria? Result { get; private set; }
 
     public ReportWindow()
@@ -19,14 +18,12 @@ public partial class ReportWindow : Window
 
     private void GenerateReport_Click(object sender, RoutedEventArgs e)
     {
-        // 1. Проверка дат
         if (StartDatePicker.SelectedDate > EndDatePicker.SelectedDate)
         {
             MessageBox.Show("Дата 'От' не может быть больше даты 'До'", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-
-        // 2. Парсинг суммы (если введена)
+        
         decimal minAmount = 0;
         if (!string.IsNullOrWhiteSpace(MinAmountBox.Text))
         {
@@ -36,8 +33,7 @@ public partial class ReportWindow : Window
                 return;
             }
         }
-
-        // 3. Формируем результат
+        
         Result = new ReportCriteria
         {
             FullName = FullNameBox.Text.Trim(),
@@ -55,7 +51,6 @@ public partial class ReportWindow : Window
     }
 }
 
-// Модель критериев отчета
 public class ReportCriteria
 {
     public string FullName { get; set; } = string.Empty;

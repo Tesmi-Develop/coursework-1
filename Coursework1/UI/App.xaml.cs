@@ -10,10 +10,10 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-
-        // Создаем базу данных один раз
+        
         var driverDatabase = new DriverDatabase();
-        var clientHandler = new ClientHandler(driverDatabase);
+        var fineDatabase = new FineDatabase();
+        var clientHandler = new ClientHandler(driverDatabase, fineDatabase);
         
         var mainWindow = new MainWindow(clientHandler);
         mainWindow.Show();

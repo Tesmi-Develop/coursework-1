@@ -25,6 +25,11 @@ public class DriverDatabase
         return true;
     }
 
+    public bool Has(DriverLicense license)
+    {
+        return _drivers.ContainsKey(license);
+    }
+
     public bool TryAdd(Driver driver)
     {
         Log($"[ADD] Попытка добавления: {driver.License}");

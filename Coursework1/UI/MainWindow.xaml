@@ -18,7 +18,7 @@
             </MenuItem>
             <MenuItem Header="Штрафы">
                 <MenuItem Header="Добавить" Click="AddFine_Click" />
-                <MenuItem Header="Удалить выбранное" />
+                <MenuItem Header="Удалить выбранное" Click="RemoveFines_Click" />
             </MenuItem>
         </Menu>
 
@@ -80,7 +80,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Серия/Номер ВУ" Binding="{Binding License}" Width="Auto"/>
                             <DataGridTextColumn Header="ФИО" Binding="{Binding Name}" Width="*"/>
-                            <DataGridTextColumn Header="Категории" Binding="{Binding Categories}" Width="80"/>
+                            <DataGridTextColumn Header="Категории" Binding="{Binding Categories}" Width="Auto"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>
@@ -93,12 +93,12 @@
                     <Border DockPanel.Dock="Top" Background="#F3F3F3" BorderBrush="#DCDCDC" BorderThickness="0,0,0,1" Margin="0,0,0,5">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <TextBlock Text="Поиск по ВУ:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <TextBox Width="150" VerticalContentAlignment="Center"/>
-                            <Button Content="Найти" Margin="5,0" Padding="10,2"/>
+                            <TextBox x:Name="SearchInFines" Width="150" VerticalContentAlignment="Center"/>
+                            <Button Click="FindFines_Click" Content="Найти" Margin="5,0" Padding="10,2"/>
                         </StackPanel>
                     </Border>
 
-                    <DataGrid ItemsSource="{Binding Fines}" 
+                    <DataGrid x:Name="FinesGrid" ItemsSource="{Binding Fines}" 
                               CanUserResizeColumns="False" 
                               CanUserResizeRows="False"
                               CanUserSortColumns="False"
@@ -108,10 +108,10 @@
                               SelectionMode="Extended"
                               Background="White">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Серия/Номер ВУ" Binding="{Binding License}" Width="Auto"/>
-                            <DataGridTextColumn Header="Нарушение" Binding="{Binding Article}" Width="*"/>
-                            <DataGridTextColumn Header="Сумма" Binding="{Binding Price}" Width="Auto"/>
-                            <DataGridTextColumn Header="Дата нарушения" Binding="{Binding Date}" Width="Auto"/>
+                            <DataGridTextColumn Header="Серия/Номер ВУ" Binding="{Binding Fine.License}" Width="Auto"/>
+                            <DataGridTextColumn Header="Нарушение" Binding="{Binding Fine.Article}" Width="*"/>
+                            <DataGridTextColumn Header="Сумма" Binding="{Binding Fine.Price}" Width="Auto"/>
+                            <DataGridTextColumn Header="Дата нарушения" Binding="{Binding Fine.Date}" Width="Auto"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>

@@ -2,18 +2,19 @@
 using System.Windows;
 using Coursework1.Data;
 using Coursework1.Utilities;
+// ReSharper disable CollectionNeverQueried.Global
 
 namespace Coursework1.UI;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : Window
+public partial class MainWindow
 {
     public ObservableCollection<Driver> Drivers { get; set; } = [];
-    public ObservableCollection<Fine> Fines { get; set; } = [];
-    private readonly ClientHandler _clientHandler;
+    public ObservableCollection<FineWithId> Fines { get; set; } = [];
     
+    private readonly ClientHandler _clientHandler;
     private readonly DebugWindow _debugWindow = new();
     
     public MainWindow(ClientHandler clientHandler)
@@ -51,6 +52,46 @@ public partial class MainWindow : Window
                 Drivers.Add(driver);
         };
 
+        _clientHandler.FineAdded += fine =>
+        {
+            Fines.Add(fine);
+        };
+
+        _clientHandler.FineRemoved += (removed, replacer, indexRemoved) =>
+        {
+            if (Fines.Count == 0)
+                return;
+
+            var idToRemove = -1;
+            
+            for (var i = 0; i < Fines.Count; i++)
+            {
+                if (Fines[i].Id == removed.Id)
+                    idToRemove = i;
+                
+                if (replacer.HasValue && Fines[i].Id == replacer.Value.Id)
+                    Fines[i] = replacer.Value;
+
+                if (indexRemoved.HasValue && Fines[i].Id == indexRemoved)
+                    idToRemove = indexRemoved.Value;
+            }
+            
+            if (idToRemove != -1)
+                Fines.RemoveAt(idToRemove);
+        };
+
+        _clientHandler.FullUpdateFines += fines =>
+        {
+            Fines.Clear();
+            foreach (var fine in fines)
+                Fines.Add(fine);
+        };
+        
+        _clientHandler.ClearFines += () =>
+        {
+            Fines.Clear();
+        };
+        
         _clientHandler.LogMessage += _debugWindow.Log;
     }
     
@@ -77,30 +118,17 @@ public partial class MainWindow : Window
 
     private bool ValidateDriverLicense(DriverLicense license)
     {
-        return true;
+        return _clientHandler.HasDriver(license);
     }
 
-    private bool AddDriver(Driver driver)
+    private void AddDriver(Driver driver)
     {
-        return _clientHandler.AddDriver(driver);
+        _clientHandler.AddDriver(driver);
     }
 
     private void AddFine(Fine fine)
     {
-        return;
-    }
-    
-    public void AddFine_Click(object sender, RoutedEventArgs e)
-    {
-        var addWindow = new AddFineWindow(ValidateDriverLicense)
-        {
-            Owner = this
-        };
-
-        if (addWindow.ShowDialog() != true || !addWindow.IsSuccess)
-            return;
-        
-        AddFine(addWindow.CreatedFine!.Value);
+        _clientHandler.AddFine(fine);
     }
 
     public void RemoveDrivers_Click(object sender, RoutedEventArgs e)
@@ -141,5 +169,42 @@ public partial class MainWindow : Window
         {
             ErrorWindow.Show(this,"Нельзя задать параметры ХТ когда есть записи");
         }
+    }
+    
+    public void AddFine_Click(object sender, RoutedEventArgs e)
+    {
+        var addWindow = new AddFineWindow(ValidateDriverLicense)
+        {
+            Owner = this
+        };
+
+        if (addWindow.ShowDialog() != true || !addWindow.IsSuccess)
+            return;
+        
+        AddFine(addWindow.CreatedFine!.Value);
+    }
+
+    public void RemoveFines_Click(object sender, RoutedEventArgs e)
+    {
+        var selectedFines = FinesGrid.SelectedItems.Cast<FineWithId>().ToArray();
+        if (selectedFines.Length <= 0)
+            return;
+        
+        _clientHandler.RemoveFines(selectedFines);
+    }
+
+    public void FindFines_Click(object sender, RoutedEventArgs e)
+    {
+        var input = SearchInFines.Text;
+        if (string.IsNullOrEmpty(input))
+        {
+            _clientHandler.DisableSearchInFines();
+            return;
+        }
+
+        if (!DriverLicenseParser.TryParse(input, out var output, out _))
+            output = DriverLicense.Invalid;
+        
+        _clientHandler.EnableSearchInFines(output);
     }
 }
