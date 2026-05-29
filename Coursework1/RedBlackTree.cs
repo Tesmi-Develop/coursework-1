@@ -98,6 +98,154 @@ public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
         return node.Values.Replace(oldValue, newValue);
     }
 
+    public TValue[] GetValuesInRange(TKey from, TKey to, Predicate<TValue> match)
+    {
+        if (from.CompareTo(to) > 0)
+            throw new ArgumentException();
+
+        if (_root == _nil)
+            return [];
+        
+        var splitNode = _root;
+
+        while (splitNode != _nil)
+        {
+            if (from.CompareTo(splitNode.Key) < 0 && to.CompareTo(splitNode.Key) < 0)
+            {
+                splitNode = splitNode.Left;
+                continue;
+            }
+            if (from.CompareTo(splitNode.Key) > 0 && to.CompareTo(splitNode.Key) > 0)
+            {
+                splitNode = splitNode.Right;
+                continue;
+            }
+            
+            break;
+        }
+
+        if (splitNode == _nil)
+            return [];
+        
+        var (fromNode, leftCount) = FindBoundary(splitNode.Left, from, false, match);
+        var (toNode, rightCount) = FindBoundary(splitNode.Right, to, true, match);
+        var splitCount = CountMatchingInNode(splitNode, match);
+
+        if (leftCount + splitCount + rightCount == 0)
+            return [];
+
+        var result = new TValue[leftCount + splitCount + rightCount];
+        var i = 0;
+    
+        var current = fromNode != _nil ? fromNode : splitNode;
+        var endNode = toNode != _nil ? toNode : splitNode;
+
+        while (current != _nil)
+        {
+            FillArrayFromNode(current, result, ref i, match);
+        
+            if (current == endNode)
+                break;
+        
+            current = GetSuccessor(current);
+        }
+
+        return result;
+    }
+    
+    public Node GetSuccessor(Node node)
+    {
+        if (node.Right != _nil)
+        {
+            node = node.Right;
+            while (node.Left != _nil)
+                node = node.Left;
+            return node;
+        }
+
+        var parent = node.Parent;
+        while (node == parent.Right)
+        {
+            node = parent;
+            parent = parent.Parent;
+        }
+    
+        return parent;
+    }
+
+    private int CountMatchingInNode(Node node, Predicate<TValue> match)
+    {
+        if (node == _nil) 
+            return 0;
+        
+        var count = 0;
+        
+        foreach (var val in node.Values)
+            if (match(val)) 
+                count++;
+        
+        return count;
+    }
+
+    public (Node node, int count) FindBoundary(Node startNode, TKey limit, bool isSearchingMax, Predicate<TValue> match)
+    {
+        var current = startNode;
+        var boundaryNode = _nil;
+        var totalCount = 0;
+
+        while (current != _nil)
+        {
+            var comparison = limit.CompareTo(current.Key);
+            if (isSearchingMax)
+            {
+                if (comparison >= 0)
+                {
+                    boundaryNode = current;
+                    totalCount += CountMatchingInNode(current, match);
+                    totalCount += CountAll(current.Left, match);
+                    current = current.Right;
+                    continue;
+                }
+                current = current.Left;
+                continue;
+            }
+        
+            if (comparison <= 0)
+            {
+                boundaryNode = current;
+                totalCount += CountMatchingInNode(current, match);
+                totalCount += CountAll(current.Right, match);
+                current = current.Left;
+                continue;
+            }
+            current = current.Right;
+        }
+        
+        return (boundaryNode, totalCount);
+    }
+
+    private int CountAll(Node node, Predicate<TValue> match)
+    {
+        if (node == _nil) 
+            return 0;
+        
+        return CountMatchingInNode(node, match) + 
+               CountAll(node.Left, match) + 
+               CountAll(node.Right, match);
+    }
+
+    public void FillArrayFromNode(Node node, TValue[] array, ref int startIndex, Predicate<TValue> match)
+    {
+        foreach (var val in node.Values)
+        {
+            if (!match(val)) 
+                continue;
+            
+            array[startIndex] = val;
+            startIndex++;
+        }
+    }
+
     private void TreeInsert(Node z)
     {
         var y = _nil;

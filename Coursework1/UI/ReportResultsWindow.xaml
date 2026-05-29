@@ -41,7 +41,7 @@
                                     MinWidth="100"/>
 
                 <DataGridTextColumn Header="ФИО нарушителя" 
-                                    Binding="{Binding Name}" 
+                                    Binding="{Binding FullName}" 
                                     Width="2*"/>
 
                 <DataGridTextColumn Header="Категория" 
@@ -51,11 +51,11 @@
                                     ElementStyle="{StaticResource CenterAlignmentStyle}"/>
 
                 <DataGridTextColumn Header="Нарушение" 
-                                    Binding="{Binding Title}" 
+                                    Binding="{Binding Article}" 
                                     Width="3*"/>
 
                 <DataGridTextColumn Header="Сумма (₽)" 
-                                    Binding="{Binding Amount, StringFormat={}{0:N0}}" 
+                                    Binding="{Binding Price, StringFormat={}{0:N0}}" 
                                     Width="Auto"
                                     MinWidth="80"
                                     ElementStyle="{StaticResource CenterAlignmentStyle}"/>

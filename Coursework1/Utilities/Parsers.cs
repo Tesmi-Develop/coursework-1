@@ -1,9 +1,31 @@
+using System.Text.RegularExpressions;
 using Coursework1.Data;
 
 namespace Coursework1.Utilities;
 
-public static class DriverLicenseParser
+public static class Parsers
 {
+    public static bool TryParseFullName(string lastName, string firstName, string middleName, out FullName name, out string error)
+    {
+        error = string.Empty;
+        name = default;
+        
+        const string pattern = "^[А-ЯЁ][а-яё]{1,}$";
+        
+        var isLastValid = Regex.IsMatch(lastName, pattern);
+        var isFirstValid = Regex.IsMatch(firstName, pattern);
+        var isMiddleValid = Regex.IsMatch(middleName, pattern);
+
+        if (isLastValid && isFirstValid && isMiddleValid)
+        {
+            name = new FullName(lastName, firstName, middleName);
+            return true;
+        }
+
+        error = "Некорректное ФИО";
+        return false;
+    }
+    
     public static bool TryParse(string input, out DriverLicense output, out string error)
     {
         output = default;
@@ -40,5 +62,19 @@ public static class DriverLicenseParser
 
         output = new DriverLicense(serial, driverNumber);
         return true;
+    }
+    
+    public static bool TryParseLicense(string input, out DriverLicense driverLicense, out string error)
+    {
+        error = string.Empty;
+        driverLicense = default;
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            error = "Введите данные ВУ";
+            return false;
+        }
+
+        return TryParse(input, out driverLicense, out error);
     }
 }

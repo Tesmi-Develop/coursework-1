@@ -186,4 +186,36 @@ public class ClientHandler
         _filterInFines = null;
         SyncFines();
     }
+
+    public ReportItem[] CreateReport(ReportCriteria reportCriteria)
+    {
+        var fines = _fineDatabase.CreateReport(reportCriteria, (fine) =>
+        {
+            if (!_driverDatabase.TryFind(fine.License, out var driver))
+                throw new Exception("Driver not found");
+
+            return reportCriteria.FullName == driver.FullName && reportCriteria.Amount == fine.Price;
+        });
+        
+        var result = new ReportItem[fines.Length];
+        var i = 0;
+        foreach (var fine in fines)
+        {
+            if (!_driverDatabase.TryFind(fine.License, out var driver))
+                throw new Exception("Driver not found");
+            
+            result[i] = new ReportItem
+            {
+                License = fine.License,
+                FullName = driver.FullName,
+                Categories = driver.Categories,
+                Article = fine.Article,
+                Price = fine.Price,
+                Date = fine.Date
+            };
+            i++;
+        }
+
+        return result;
+    }
 }

@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using Coursework1.Data;
+using Coursework1.Utilities;
 
 namespace Coursework1.UI;
 
@@ -18,28 +20,41 @@ public partial class ReportWindow
 
     private void GenerateReport_Click(object sender, RoutedEventArgs e)
     {
-        if (StartDatePicker.SelectedDate > EndDatePicker.SelectedDate)
+        if (!StartDatePicker.SelectedDate.HasValue || !EndDatePicker.SelectedDate.HasValue)
         {
-            MessageBox.Show("Дата 'От' не может быть больше даты 'До'", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+            ErrorWindow.Show(this, "Даты не выбраны");
             return;
         }
         
-        decimal minAmount = 0;
+        if (StartDatePicker.SelectedDate > EndDatePicker.SelectedDate)
+        {
+            ErrorWindow.Show(this, "Дата 'От' не может быть больше даты 'До'");
+            return;
+        }
+        
+        var amount = 0;
         if (!string.IsNullOrWhiteSpace(MinAmountBox.Text))
         {
-            if (!decimal.TryParse(MinAmountBox.Text, out minAmount))
+            if (!int.TryParse(MinAmountBox.Text, out amount))
             {
-                MessageBox.Show("Введите корректную сумму", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ErrorWindow.Show(this, "Введите корректную сумму");
                 return;
             }
+        }
+
+        if (!Parsers.TryParseFullName(LastNameBox.Text, FirstNameBox.Text, MiddleNameBox.Text, out var fullName,
+                out var error))
+        {
+            ErrorWindow.Show(this, error);
+            return;
         }
         
         Result = new ReportCriteria
         {
-            FullName = FullNameBox.Text.Trim(),
-            MinAmount = minAmount,
-            From = StartDatePicker.SelectedDate ?? DateTime.MinValue,
-            To = EndDatePicker.SelectedDate ?? DateTime.MaxValue
+            FullName = fullName,
+            Amount = amount,
+            From = StartDatePicker.SelectedDate!.Value,
+            To = EndDatePicker.SelectedDate!.Value
         };
 
         DialogResult = true;
@@ -49,12 +64,4 @@ public partial class ReportWindow
     {
         e.Handled = !Regex.IsMatch(e.Text, "^[0-9]+$");
     }
-}
-
-public class ReportCriteria
-{
-    public string FullName { get; set; } = string.Empty;
-    public decimal MinAmount { get; set; }
-    public DateTime From { get; set; }
-    public DateTime To { get; set; }
 }

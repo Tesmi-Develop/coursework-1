@@ -41,7 +41,7 @@ public partial class AddFineWindow : Window
             return;
         }
 
-        if (!DriverLicenseParser.TryParse(VuBox.Text, out var license, out var error))
+        if (!Parsers.TryParse(VuBox.Text, out var license, out var error))
         {
             ErrorWindow.Show(this, error);
             return;

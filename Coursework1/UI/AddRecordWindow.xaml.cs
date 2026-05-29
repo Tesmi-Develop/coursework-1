@@ -34,46 +34,11 @@ public partial class AddRecordWindow : Window
         else
             _selectedCategories &= ~category;
     }
-
-    private bool TryParseLicense(string input, out DriverLicense driverLicense, out string error)
-    {
-        error = string.Empty;
-        driverLicense = default;
-
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            error = "Введите данные ВУ";
-            return false;
-        }
-
-        return DriverLicenseParser.TryParse(input, out driverLicense, out error);
-    }
-
-    private bool TryParseFullName(string lastName, string firstName, string middleName, out FullName name, out string error)
-    {
-        error = string.Empty;
-        name = default;
-        
-        const string pattern = "^[А-ЯЁ][а-яё]{1,}$";
-        
-        var isLastValid = Regex.IsMatch(lastName, pattern);
-        var isFirstValid = Regex.IsMatch(firstName, pattern);
-        var isMiddleValid = Regex.IsMatch(middleName, pattern);
-
-        if (isLastValid && isFirstValid && isMiddleValid)
-        {
-            name = new FullName(lastName, firstName, middleName);
-            return true;
-        }
-
-        error = "Некорректное ФИО";
-        return false;
-    }
     
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        if (!TryParseFullName(LastNameBox.Text, FirstNameBox.Text, MiddleNameBox.Text, out var fullName, out var error ) || 
-            !TryParseLicense(VuBox.Text, out var driverLicense, out error))
+        if (!Parsers.TryParseFullName(LastNameBox.Text, FirstNameBox.Text, MiddleNameBox.Text, out var fullName, out var error ) || 
+            !Parsers.TryParseLicense(VuBox.Text, out var driverLicense, out error))
         {
             ErrorWindow.Show(this, error);
             return;
@@ -88,7 +53,7 @@ public partial class AddRecordWindow : Window
         CreatedDriver = new Driver
         {
             License = driverLicense,
-            Name = new FullName(LastNameBox.Text, FirstNameBox.Text, MiddleNameBox.Text),
+            FullName = new FullName(LastNameBox.Text, FirstNameBox.Text, MiddleNameBox.Text),
             Categories = _selectedCategories
         };
         DialogResult = true;

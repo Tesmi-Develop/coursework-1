@@ -13,7 +13,7 @@
             <MenuItem Header="Водители">
                 <MenuItem Header="Добавить" Click="AddDriver_Click"/>
                 <MenuItem Header="Удалить выбранное" Click="RemoveDrivers_Click" />
-                <MenuItem Header="Отчёт" />
+                <MenuItem Header="Отчёт" Click="ReportCreate_Click"/>
                 <MenuItem Header="Задать размер ХТ" Click="SetHashTableCapacity_Click" />
             </MenuItem>
             <MenuItem Header="Штрафы">
@@ -79,7 +79,7 @@
                               ColumnHeaderHeight="30">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Серия/Номер ВУ" Binding="{Binding License}" Width="Auto"/>
-                            <DataGridTextColumn Header="ФИО" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="*"/>
                             <DataGridTextColumn Header="Категории" Binding="{Binding Categories}" Width="Auto"/>
                         </DataGrid.Columns>
                     </DataGrid>

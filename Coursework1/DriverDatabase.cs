@@ -77,7 +77,7 @@ public class DriverDatabase
         var found = _drivers.TryGetValue(license, out driver);
 
         if (found)
-            Log($"[FOUND] Найден: {driver.Name}");
+            Log($"[FOUND] Найден: {driver.FullName}");
         else
             Log("[NOT FOUND] Не найден.");
 

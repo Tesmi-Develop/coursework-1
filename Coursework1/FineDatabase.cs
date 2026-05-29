@@ -20,6 +20,21 @@ public class FineDatabase : IEnumerable<Fine>
 
         return new FineWithId { Fine = fine, Id = _fines.Count - 1 };
     }
+    
+    public Fine[] CreateReport(ReportCriteria reportCriteria, Predicate<Fine> predicate)
+    {
+        var indexes = _indexesByDateTime.GetValuesInRange(reportCriteria.From, reportCriteria.To, (index) => predicate(_fines[index]));
+        var result = new Fine[indexes.Length];
+        
+        var currentIndex = 0;
+        foreach (var index in indexes)
+        {
+            result[currentIndex] = _fines[index];
+            currentIndex++;
+        }
+        
+        return result;
+    }
 
     public FineWithId[] Search(DriverLicense license)
     {

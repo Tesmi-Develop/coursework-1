@@ -1,41 +1,41 @@
 <Window x:Class="Coursework1.UI.ReportWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Параметры отчёта" Height="320" Width="500" 
+        Title="Параметры отчёта" Height="380" Width="500" 
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <RowDefinition Height="Auto"/> <RowDefinition Height="Auto"/> <RowDefinition Height="Auto"/> <RowDefinition Height="Auto"/> <RowDefinition Height="Auto"/> <RowDefinition Height="*"/>    <RowDefinition Height="Auto"/> </Grid.RowDefinitions>
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        
+        <TextBlock Text="Фамилия:" Grid.Row="0" VerticalAlignment="Center" Margin="0,5"/>
+        <TextBox x:Name="LastNameBox" Grid.Row="0" Grid.Column="1" Margin="10,5" Padding="3"/>
 
-        <TextBlock Text="ФИО водителя:" Grid.Row="0" VerticalAlignment="Center" Margin="0,5"/>
-        <TextBox x:Name="FullNameBox" Grid.Row="0" Grid.Column="1" Margin="10,5" Padding="3"/>
+        <TextBlock Text="Имя:" Grid.Row="1" VerticalAlignment="Center" Margin="0,5"/>
+        <TextBox x:Name="FirstNameBox" Grid.Row="1" Grid.Column="1" Margin="10,5" Padding="3"/>
 
-        <TextBlock Text="Сумма (₽):" Grid.Row="1" VerticalAlignment="Center" Margin="0,5"/>
-        <TextBox x:Name="MinAmountBox" Grid.Row="1" Grid.Column="1" Margin="10,5" Padding="3" 
-                 Width="150" HorizontalAlignment="Left"/>
+        <TextBlock Text="Отчество:" Grid.Row="2" VerticalAlignment="Center" Margin="0,5"/>
+        <TextBox x:Name="MiddleNameBox" Grid.Row="2" Grid.Column="1" Margin="10,5" Padding="3"/>
 
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,15,0,5">
-            <TextBlock Text="Дата нарушений (включительно):" Margin="0,0,0,8" Foreground="#333"/>
-            
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
-                <DatePicker x:Name="StartDatePicker" Width="150" VerticalAlignment="Center"/>
-                <TextBlock Text="—" VerticalAlignment="Center" Margin="10,0"/>
-                <DatePicker x:Name="EndDatePicker" Width="150" VerticalAlignment="Center"/>
-            </StackPanel>
+        <TextBlock Text="Мин. сумма (₽):" Grid.Row="3" VerticalAlignment="Center" Margin="0,5"/>
+        <TextBox x:Name="MinAmountBox" Grid.Row="3" Grid.Column="1" Margin="10,5" Padding="3" />
+
+        <TextBlock Text="Дата нарушений (включительно):" Grid.Row="4" Grid.ColumnSpan="2" 
+                   Margin="0,15,0,8" Foreground="#333" FontWeight="SemiBold"/>
+        
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,10">
+            <DatePicker x:Name="StartDatePicker" Width="150" VerticalAlignment="Center"/>
+            <TextBlock Text="—" VerticalAlignment="Center" Margin="15,0"/>
+            <DatePicker x:Name="EndDatePicker" Width="150" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="Отмена" Width="80" IsCancel="True" Margin="0,0,10,0"/>
-            <Button Content="Сформировать" Width="120" IsDefault="True" Click="GenerateReport_Click"/>
+        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Отмена" Width="80" IsCancel="True" Margin="0,0,10,0" Height="25"/>
+            <Button Content="Сформировать" Width="120" IsDefault="True" Click="GenerateReport_Click" Height="25"/>
         </StackPanel>
     </Grid>
 </Window>

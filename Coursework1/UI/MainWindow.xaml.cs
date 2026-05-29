@@ -149,7 +149,7 @@ public partial class MainWindow
             return;
         }
 
-        if (!DriverLicenseParser.TryParse(input, out var output, out _))
+        if (!Parsers.TryParse(input, out var output, out _))
             output = DriverLicense.Invalid;
         
         _clientHandler.EnableSearchInDrivers(output);
@@ -202,9 +202,29 @@ public partial class MainWindow
             return;
         }
 
-        if (!DriverLicenseParser.TryParse(input, out var output, out _))
+        if (!Parsers.TryParse(input, out var output, out _))
             output = DriverLicense.Invalid;
         
         _clientHandler.EnableSearchInFines(output);
+    }
+
+    public void ReportCreate_Click(object sender, RoutedEventArgs e)
+    {
+        var reportWindow = new ReportWindow()
+        {
+            Owner = this,
+        };
+
+        if (reportWindow.ShowDialog() != true || reportWindow.Result is null)
+            return;
+
+        var items = _clientHandler.CreateReport(reportWindow.Result);
+        
+        var reportResultWindow = new ReportResultsWindow(items)
+        {
+            Owner = this
+        };
+        
+        reportResultWindow.Show();
     }
 }
