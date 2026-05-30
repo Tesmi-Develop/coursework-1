@@ -106,7 +106,7 @@ public class DynamicArray<T> : ICollection<T>
     
     public bool Contains(T item)
     {
-        for (int i = 0; i < _size; i++)
+        for (var i = 0; i < _size; i++)
         {
             if (EqualityComparer<T>.Default.Equals(_items[i], item))
                 return true;
@@ -155,13 +155,21 @@ public class DynamicArray<T> : ICollection<T>
 
     public bool Remove(T item)
     {
-        int index = IndexOf(item);
+        var index = IndexOf(item);
         if (index >= 0)
         {
             RemoveAt(index);
             return true;
         }
         return false;
+    }
+
+    public T[] ToArray()
+    {
+        var result = new T[_size];
+        Array.Copy(_items, 0, result, 0, _size);
+
+        return result;
     }
 
     public void CopyTo(T[] array, int arrayIndex)

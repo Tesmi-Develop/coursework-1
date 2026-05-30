@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using System.Windows;
-using Coursework1.Data;
+﻿using System.Windows;
 
 namespace Coursework1.UI;
 

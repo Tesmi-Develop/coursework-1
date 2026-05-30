@@ -4,7 +4,7 @@ public record struct Fine
 {
     public DriverLicense License { get; init; }
     public string Article { get; set; }
-    public int Price { get; init; }
+    public int Price { get; set; }
     public FormattedDate Date { get; set; }
     
     public Fine(DriverLicense license, string article, int price, DateTime date)

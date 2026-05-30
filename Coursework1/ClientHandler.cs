@@ -224,12 +224,39 @@ public class ClientHandler
         if (!_driverDatabase.TryImport(filePath, out error))
             return false;
         
+        DisableSearchInDrivers();
         ClearDrivers?.Invoke();
         SyncDrivers();
         return true;
     }
     
     public bool TryExportDrivers(string filePath, out string error)
+    {
+        return _driverDatabase.TryExport(filePath, out error);
+    }
+    
+    public bool TryImportFines(string filePath, out string error)
+    {
+        if (!_fineDatabase.TryImport(filePath, (fine, out error) =>
+            {
+                if (!_driverDatabase.Has(fine.License))
+                {
+                    error = $"ВУ: {fine.License} отсутствует в базе";
+                    return false;
+                }
+
+                error = string.Empty;
+                return true;
+            }, out error))
+            return false;
+        
+        DisableSearchInFines();
+        ClearFines?.Invoke();
+        SyncFines();
+        return true;
+    }
+    
+    public bool TryExportFines(string filePath, out string error)
     {
         return _driverDatabase.TryExport(filePath, out error);
     }

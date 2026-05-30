@@ -15,8 +15,8 @@
                 <MenuItem Header="Задать размер ХТ" Click="SetHashTableCapacity_Click" />
             </MenuItem>
             <MenuItem Header="Штрафы">
-                <MenuItem Header="Импорт" />
-                <MenuItem Header="Экспорт" />
+                <MenuItem Header="Импорт" Click="ImportFines_Click"/>
+                <MenuItem Header="Экспорт" Click="ExportFinesButton_Click"/>
                 <MenuItem Header="Добавить" Click="AddFine_Click" />
                 <MenuItem Header="Удалить выбранное" Click="RemoveFines_Click" />
             </MenuItem>

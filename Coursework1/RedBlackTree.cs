@@ -101,21 +101,22 @@ public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
     public TValue[] GetValuesInRange(TKey from, TKey to, Predicate<TValue> match)
     {
         if (from.CompareTo(to) > 0)
-            throw new ArgumentException();
+            throw new ArgumentException("Начальный ключ не может быть больше конечного.");
 
         if (_root == _nil)
             return [];
-        
+
         var splitNode = _root;
 
         while (splitNode != _nil)
         {
-            if (from.CompareTo(splitNode.Key) < 0 && to.CompareTo(splitNode.Key) < 0)
+            if (to.CompareTo(splitNode.Key) < 0)
             {
                 splitNode = splitNode.Left;
                 continue;
             }
-            if (from.CompareTo(splitNode.Key) > 0 && to.CompareTo(splitNode.Key) > 0)
+
+            if (from.CompareTo(splitNode.Key) > 0)
             {
                 splitNode = splitNode.Right;
                 continue;
@@ -328,7 +329,12 @@ public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
             return false;
 
         if (!z.Values.Empty && z.Values.TryRemove(value, out removed))
+        {
+            if (z.Values.Empty)
+                RbDelete(z);
+            
             return true;
+        }
 
         if (z.Values.Empty)
             RbDelete(z);

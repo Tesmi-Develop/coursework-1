@@ -75,7 +75,7 @@ public partial class MainWindow
                     Fines[i] = replacer.Value;
 
                 if (indexRemoved.HasValue && Fines[i].Id == indexRemoved)
-                    idToRemove = indexRemoved.Value;
+                    idToRemove = i;
             }
             
             if (idToRemove != -1)
@@ -266,6 +266,50 @@ public partial class MainWindow
         var filePath = saveFileDialog.FileName;
 
         if (!_clientHandler.TryExportDrivers(filePath, out var error))
+        {
+            ErrorWindow.Show(this, error);
+            return;
+        }
+        
+        MessageBox.Show("Файл успешно экспортирован!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+    
+    public void ImportFines_Click(object sender, RoutedEventArgs e)
+    {
+        var openFileDialog = new OpenFileDialog
+        {
+            Filter = "JSON файлы (*.json)|*.json|Все файлы (*.*)|*.*",
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+            Title = "Выберите файл отчета"
+        };
+        
+        if (openFileDialog.ShowDialog() != true)
+            return;
+        
+        var selectedFilePath = openFileDialog.FileName;
+
+        if (_clientHandler.TryImportFines(selectedFilePath, out var error))
+            return;
+        
+        ErrorWindow.Show(this, error);
+    }
+    
+    private void ExportFinesButton_Click(object sender, RoutedEventArgs e)
+    {
+        var saveFileDialog = new SaveFileDialog
+        {
+            Filter = "JSON файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*",
+            DefaultExt = "json",
+            FileName = "report_fines",
+            Title = "Экспорт данных"
+        };
+        
+        if (saveFileDialog.ShowDialog() != true)
+            return;
+        
+        var filePath = saveFileDialog.FileName;
+
+        if (!_clientHandler.TryExportFines(filePath, out var error))
         {
             ErrorWindow.Show(this, error);
             return;

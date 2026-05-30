@@ -1,15 +1,24 @@
 <Window x:Class="Coursework1.UI.ErrorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Ошибка" Height="180" Width="380" 
-        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False">
+        Title="Ошибка" 
+        Width="380" 
+        MinHeight="160"
+        SizeToContent="Height" 
+        WindowStartupLocation="CenterOwner" 
+        ResizeMode="NoResize" 
+        ShowInTaskbar="False">
     <Grid Margin="25">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/> <ColumnDefinition Width="*"/>    </Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>      <RowDefinition Height="Auto"/>   </Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-        <Grid Grid.Column="0" VerticalAlignment="Center">
+        <Grid Grid.Column="0" VerticalAlignment="Top" Margin="0,5,0,0">
             <Ellipse Width="42" Height="42" Fill="#FFDADA"/>
             <TextBlock Text="✕" Foreground="#D32F2F" FontSize="22" 
                        HorizontalAlignment="Center" VerticalAlignment="Center" 
@@ -20,7 +29,7 @@
                    Grid.Column="1" 
                    TextWrapping="Wrap" 
                    Margin="20,0,0,0" 
-                   VerticalAlignment="Center" 
+                   VerticalAlignment="Top" 
                    FontSize="13"
                    LineHeight="18"
                    Text="Текст ошибки по умолчанию"/>
@@ -29,7 +38,7 @@
                 Grid.Row="1" Grid.ColumnSpan="2" 
                 HorizontalAlignment="Right" 
                 Width="90" Height="28"
-                Margin="0,15,0,0"
+                Margin="0,20,0,0"
                 IsDefault="True" 
                 Click="Close_Click"/>
     </Grid>
