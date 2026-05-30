@@ -7,15 +7,18 @@ public static class Parsers
 {
     public static bool TryParseFullName(string lastName, string firstName, string middleName, out FullName name, out string error)
     {
+        lastName = lastName.Trim();
+        firstName = firstName.Trim();
+        middleName = middleName.Trim();
+        
         error = string.Empty;
         name = default;
-        
         const string pattern = "^[А-ЯЁ][а-яё]{1,}$";
         
         var isLastValid = Regex.IsMatch(lastName, pattern);
         var isFirstValid = Regex.IsMatch(firstName, pattern);
         var isMiddleValid = Regex.IsMatch(middleName, pattern);
-
+        
         if (isLastValid && isFirstValid && isMiddleValid)
         {
             name = new FullName(lastName, firstName, middleName);
@@ -26,10 +29,18 @@ public static class Parsers
         return false;
     }
     
-    public static bool TryParse(string input, out DriverLicense output, out string error)
+    public static bool TryParseLicense(string input, out DriverLicense output, out string error)
     {
+        input = input.Trim();
+        
         output = default;
         error = string.Empty;
+        
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            error = "Введите данные ВУ";
+            return false;
+        }
         
         var split = input.Split('-', StringSplitOptions.RemoveEmptyEntries);
         
@@ -62,19 +73,5 @@ public static class Parsers
 
         output = new DriverLicense(serial, driverNumber);
         return true;
-    }
-    
-    public static bool TryParseLicense(string input, out DriverLicense driverLicense, out string error)
-    {
-        error = string.Empty;
-        driverLicense = default;
-
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            error = "Введите данные ВУ";
-            return false;
-        }
-
-        return TryParse(input, out driverLicense, out error);
     }
 }

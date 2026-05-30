@@ -226,7 +226,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
         return true;
     }
     
-    public bool Find(TKey key, out TValue? value, out int steps)
+    public bool Find(TKey key, [MaybeNullWhen(false)]out TValue value, out int steps)
     {
         var index = GetIndex(key, out steps);
         
@@ -242,14 +242,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     
     public TValue this[TKey key]
     {
-        get
-        {
-            if (Find(key, out var value, out _))
-            {
-                return value!;
-            }
-            throw new KeyNotFoundException($"Key '{key}' not found in table.");
-        }
+        get => Find(key, out var value, out _) ? value! : throw new KeyNotFoundException($"Key '{key}' not found in table.");
         set
         {
             if (Find(key, out _, out _))
@@ -277,9 +270,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
         var index = GetIndex(key, out _);
         
         if (index != -1 && _table[index].IsOccupied)
-        {
             return _table[index].Value;
-        }
         
         Add(key, defaultValue);
         return defaultValue;
@@ -304,7 +295,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
         sb.AppendLine($"Capacity: {_capacity}, Count: {Count}, Load Factor: {(double)Count/_capacity:F2}");
         sb.AppendLine($"Hash Function: MidSquare, Step (K): {_k}");
         sb.AppendLine($"--------------------------------");
-        sb.AppendLine($"{"Index", -8} | {"Status", -10} | {"Key", -20} | {"Home Index", -10} | {"Steps", -5}");
+        sb.AppendLine($"{"Index", -8} | {"Status", -10} | {"Key", -20} | {"First hash index", -10} | {"Steps", -5}");
         sb.AppendLine(new string('-', 60));
 
         for (var i = 0; i < _capacity; i++)
@@ -312,10 +303,10 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
             if (_table[i].IsOccupied)
             {
                 var key = _table[i].Key;
-                var homeIndex = MidSquareHash(key, _capacity);
+                var firstHashIndex = MidSquareHash(key, _capacity);
                 
                 var steps = 0;
-                var curr = homeIndex;
+                var curr = firstHashIndex;
                 while (curr != i)
                 {
                     steps++;
@@ -324,7 +315,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
                         break; 
                 }
 
-                sb.AppendLine($"{i, -8} | {"Occupied", -10} | {key?.ToString() ?? "null", -20} | {homeIndex, -10} | {steps, -5}");
+                sb.AppendLine($"{i, -8} | {"Occupied", -10} | {key?.ToString() ?? "null", -20} | {firstHashIndex, -10} | {steps, -5}");
             }
             else
             {

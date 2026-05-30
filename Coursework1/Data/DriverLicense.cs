@@ -1,5 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using Coursework1.JsonConverters;
+
 namespace Coursework1.Data;
 
+[JsonConverter(typeof(DriverLicenseConverter))]
 public readonly record struct DriverLicense : IComparable<DriverLicense>
 {
     public static readonly DriverLicense Invalid = new(-1, -1);

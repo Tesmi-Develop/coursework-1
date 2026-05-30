@@ -1,0 +1,22 @@
+[
+  { "License": "1029-384756", "FullName": "Иванов Иван Иванович", "Categories": "A, B" },
+  { "License": "1122-334455", "FullName": "Миронова Анна Сергеевна", "Categories": "B, M" },
+  { "License": "2039-485761", "FullName": "Федотов Станислав Юрьевич", "Categories": "D" },
+  { "License": "2233-445566", "FullName": "Новиков Сергей Петрович", "Categories": "B, BE" },
+  { "License": "3049-586712", "FullName": "Васильев Игорь Николаевич", "Categories": "C, CE" },
+  { "License": "3748-592011", "FullName": "Мельников Иван Дмитриевич", "Categories": "A, B, C" },
+  { "License": "4433-221100", "FullName": "Лебедев Константин Львович", "Categories": "D, M" },
+  { "License": "4556-002938", "FullName": "Сидоров Алексей Владимирович", "Categories": "B, C" },
+  { "License": "5060-708090", "FullName": "Смирнов Максим Андреевич", "Categories": "B, D, BE" },
+  { "License": "5544-332211", "FullName": "Волков Антон Александрович", "Categories": "A, B" },
+  { "License": "5647-382910", "FullName": "Тихонов Павел Сергеевич", "Categories": "B, M" },
+  { "License": "6677-889900", "FullName": "Соколов Денис Михайлович", "Categories": "C, CE" },
+  { "License": "7766-554433", "FullName": "Павлова Елена Викторовна", "Categories": "A, M" },
+  { "License": "8273-645190", "FullName": "Григорьев Олег Игоревич", "Categories": "C" },
+  { "License": "8877-665544", "FullName": "Кузнецов Дмитрий Олегович", "Categories": "A, B, D" },
+  { "License": "9080-706050", "FullName": "Морозов Виталий Степанович", "Categories": "C, CE" },
+  { "License": "9182-736450", "FullName": "Белов Юрий Алексеевич", "Categories": "A, D" },
+  { "License": "9928-110293", "FullName": "Петров Петр Петрович", "Categories": "C, M" },
+  { "License": "1234-567890", "FullName": "Николаев Артем Юрьевич", "Categories": "A, B, C, D, M, BE, CE" },
+  { "License": "1010-202030", "FullName": "Козлов Роман Геннадьевич", "Categories": "B, C" }
+]

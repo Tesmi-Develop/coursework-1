@@ -6,15 +6,17 @@ using Coursework1.Utilities;
 
 namespace Coursework1.UI;
 
-public partial class AddRecordWindow : Window
+public partial class AddRecordWindow
 {
     public VehicleCategory[] AllCategories { get; }
     public Driver? CreatedDriver { get; private set; }
     public bool IsSuccess => CreatedDriver is not null;
+    private readonly Func<DriverLicense, bool> _validateDriverLicense;
     private VehicleCategory _selectedCategories = VehicleCategory.None;
     
-    public AddRecordWindow()
+    public AddRecordWindow(Func<DriverLicense, bool> validateDriverLicense)
     {
+        _validateDriverLicense = validateDriverLicense;
         AllCategories = Enum.GetValues<VehicleCategory>()
             .Where(c => c != VehicleCategory.None)
             .ToArray();
@@ -47,6 +49,12 @@ public partial class AddRecordWindow : Window
         if (_selectedCategories == VehicleCategory.None)
         {
             ErrorWindow.Show(this, "Необходимо выбрать хотя бы одну категорию транспортного средства");
+            return;
+        }
+
+        if (!_validateDriverLicense.Invoke(driverLicense))
+        {
+            ErrorWindow.Show(this, "Указанные данные ВУ уже существуют");
             return;
         }
         

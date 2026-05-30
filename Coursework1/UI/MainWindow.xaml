@@ -6,17 +6,17 @@
         WindowStartupLocation="CenterScreen">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Файл">
-                <MenuItem Header="Импорт" />
-                <MenuItem Header="Экспорт" />
-            </MenuItem>
             <MenuItem Header="Водители">
+                <MenuItem Header="Импорт" Click="ImportDrivers_Click"/>
+                <MenuItem Header="Экспорт" Click="ExportDriversButton_Click"/>
                 <MenuItem Header="Добавить" Click="AddDriver_Click"/>
                 <MenuItem Header="Удалить выбранное" Click="RemoveDrivers_Click" />
                 <MenuItem Header="Отчёт" Click="ReportCreate_Click"/>
                 <MenuItem Header="Задать размер ХТ" Click="SetHashTableCapacity_Click" />
             </MenuItem>
             <MenuItem Header="Штрафы">
+                <MenuItem Header="Импорт" />
+                <MenuItem Header="Экспорт" />
                 <MenuItem Header="Добавить" Click="AddFine_Click" />
                 <MenuItem Header="Удалить выбранное" Click="RemoveFines_Click" />
             </MenuItem>

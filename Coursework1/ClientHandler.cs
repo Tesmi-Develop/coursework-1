@@ -218,4 +218,19 @@ public class ClientHandler
 
         return result;
     }
+
+    public bool TryImportDrivers(string filePath, out string error)
+    {
+        if (!_driverDatabase.TryImport(filePath, out error))
+            return false;
+        
+        ClearDrivers?.Invoke();
+        SyncDrivers();
+        return true;
+    }
+    
+    public bool TryExportDrivers(string filePath, out string error)
+    {
+        return _driverDatabase.TryExport(filePath, out error);
+    }
 }

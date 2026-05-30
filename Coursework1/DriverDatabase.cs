@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using Coursework1.Data;
 
 namespace Coursework1;
 
-public class DriverDatabase
+public class DriverDatabase : IFileDataHandler
 {
+    public int Count => _drivers.Count;
     public event Action<string>? LogMessage;
 
     private HashTable<DriverLicense, Driver> _drivers = new();
@@ -88,6 +91,98 @@ public class DriverDatabase
     {
         return _drivers.Values;
     }
+    
+    public bool TryExport(string filePath, out string error)
+    {
+        error = string.Empty;
+        string output;
+        var drivers = new Driver[_drivers.Count];
+        var i = 0;
 
-    public int Count => _drivers.Count;
+        foreach (var val in _drivers.Values)
+            drivers[i++] = val;
+        
+        var options = new JsonSerializerOptions
+        {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = true
+        };
+        
+        try
+        {
+            output = JsonSerializer.Serialize(drivers, options);
+        }
+        catch (Exception e)
+        {
+            error = $"Ошибка при сериализации данных в JSON: {e}";
+            return false;
+        }
+
+        try
+        {
+            File.WriteAllText(filePath, output);
+        }
+        catch (Exception e)
+        {
+            error = $"Ошибка при записи данных в файл: {e}";
+            return false;
+        }
+        
+        return true;
+    }
+
+    public bool TryImport(string filePath, out string error)
+    {
+        error = string.Empty;
+
+        if (!File.Exists(filePath))
+        {
+            error = $"Файл по пути '{filePath}' не найден";
+            return false;
+        }
+
+        string fileContent;
+        
+        try
+        {
+            fileContent = File.ReadAllText(filePath);
+        }
+        catch (Exception e)
+        {
+            error = $"Ошибка при открытии файла: {e.Message}";
+            return false;
+        }
+        
+        Driver[] drivers;
+
+        try
+        {
+            drivers = JsonSerializer.Deserialize<Driver[]>(fileContent) ?? [];
+        }
+        catch (JsonException e)
+        {
+            error = $"Ошибка при десериализации JSON: строка: {e.LineNumber + 1}, позиция: {e.BytePositionInLine}: {e.Message}";
+            return false;
+        }
+        
+        var localHashTable = new HashTable<DriverLicense, Driver>(drivers.Length * 2);
+
+        foreach (var driver in drivers)
+        {
+            if (localHashTable.ContainsKey(driver.License))
+            {
+                error = $"ВУ: {driver.License} встретилось несколько раз";
+                return false;
+            }
+            
+            localHashTable.Add(driver.License, driver);
+        }
+        
+        _drivers.Clear();
+
+        foreach (var (key, value) in localHashTable)
+            _drivers.Add(key, value);
+        
+        return true;
+    }
 }

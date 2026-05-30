@@ -2,6 +2,8 @@
 using System.Windows;
 using Coursework1.Data;
 using Coursework1.Utilities;
+using Microsoft.Win32;
+
 // ReSharper disable CollectionNeverQueried.Global
 
 namespace Coursework1.UI;
@@ -105,7 +107,7 @@ public partial class MainWindow
 
     public void AddDriver_Click(object sender, RoutedEventArgs e)
     {
-        var addWindow = new AddRecordWindow
+        var addWindow = new AddRecordWindow((license) => !_clientHandler.HasDriver(license))
         {
             Owner = this
         };
@@ -149,7 +151,7 @@ public partial class MainWindow
             return;
         }
 
-        if (!Parsers.TryParse(input, out var output, out _))
+        if (!Parsers.TryParseLicense(input, out var output, out _))
             output = DriverLicense.Invalid;
         
         _clientHandler.EnableSearchInDrivers(output);
@@ -202,7 +204,7 @@ public partial class MainWindow
             return;
         }
 
-        if (!Parsers.TryParse(input, out var output, out _))
+        if (!Parsers.TryParseLicense(input, out var output, out _))
             output = DriverLicense.Invalid;
         
         _clientHandler.EnableSearchInFines(output);
@@ -226,5 +228,49 @@ public partial class MainWindow
         };
         
         reportResultWindow.Show();
+    }
+
+    public void ImportDrivers_Click(object sender, RoutedEventArgs e)
+    {
+        var openFileDialog = new OpenFileDialog
+        {
+            Filter = "JSON файлы (*.json)|*.json|Все файлы (*.*)|*.*",
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+            Title = "Выберите файл отчета"
+        };
+        
+        if (openFileDialog.ShowDialog() != true)
+            return;
+        
+        var selectedFilePath = openFileDialog.FileName;
+
+        if (_clientHandler.TryImportDrivers(selectedFilePath, out var error))
+            return;
+        
+        ErrorWindow.Show(this, error);
+    }
+    
+    private void ExportDriversButton_Click(object sender, RoutedEventArgs e)
+    {
+        var saveFileDialog = new SaveFileDialog
+        {
+            Filter = "JSON файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*",
+            DefaultExt = "json",
+            FileName = "report_drivers",
+            Title = "Экспорт данных"
+        };
+        
+        if (saveFileDialog.ShowDialog() != true)
+            return;
+        
+        var filePath = saveFileDialog.FileName;
+
+        if (!_clientHandler.TryExportDrivers(filePath, out var error))
+        {
+            ErrorWindow.Show(this, error);
+            return;
+        }
+        
+        MessageBox.Show("Файл успешно экспортирован!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }

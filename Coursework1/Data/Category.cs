@@ -1,5 +1,9 @@
+using System.Text.Json.Serialization;
+using Coursework1.JsonConverters;
+
 namespace Coursework1.Data;
 
+[JsonConverter(typeof(VehicleCategoryConverter))]
 [Flags]
 public enum VehicleCategory
 {
