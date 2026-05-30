@@ -14,7 +14,8 @@ public class ClientHandler
     public event Action<FineWithId[]>? FullUpdateFines;
     public event Action? ClearFines;
     
-    public event Action<string>? LogMessage;
+    public event Action<string>? DriversLogMessage;
+    public event Action<string>? FinesLogMessage;
     
     private readonly DriverDatabase _driverDatabase;
     private readonly FineDatabase _fineDatabase;
@@ -32,7 +33,8 @@ public class ClientHandler
 
     public void Start()
     {
-        _driverDatabase.LogMessage += LogMessage;
+        _driverDatabase.LogMessage += DriversLogMessage;
+        _fineDatabase.LogMessage += FinesLogMessage;
         SyncDrivers();
         SyncFines();
     }
@@ -103,9 +105,14 @@ public class ClientHandler
             RemoveDriver(driver.License);
     }
 
+    public bool HasFine(DriverLicense license)
+    {
+        return _fineDatabase.HasLicense(license);
+    }
+
     public void RemoveDriver(DriverLicense license)
     {
-        if (!_driverDatabase.Remove(license, out var driver))
+        if (_fineDatabase.HasLicense(license) || !_driverDatabase.Remove(license, out var driver))
             return;
         
         DriverRemoved?.Invoke(driver);
@@ -131,8 +138,8 @@ public class ClientHandler
 
     public void RemoveFines(FineWithId[] fines)
     {
-        foreach (var fine in fines)
-            RemoveFine(fine);
+        for (var i = fines.Length - 1; i >= 0; i--)
+            RemoveFine(fines[i]);
     }
 
     public void RemoveFine(FineWithId fine)
@@ -258,6 +265,6 @@ public class ClientHandler
     
     public bool TryExportFines(string filePath, out string error)
     {
-        return _driverDatabase.TryExport(filePath, out error);
+        return _fineDatabase.TryExport(filePath, out error);
     }
 }

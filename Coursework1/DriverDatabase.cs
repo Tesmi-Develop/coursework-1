@@ -183,6 +183,7 @@ public class DriverDatabase : IFileDataHandler
         foreach (var (key, value) in localHashTable)
             _drivers.Add(key, value);
         
+        Log(_drivers.PrintDebugInfo());
         return true;
     }
 }

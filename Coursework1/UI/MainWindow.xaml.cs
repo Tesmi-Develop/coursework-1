@@ -17,7 +17,8 @@ public partial class MainWindow
     public ObservableCollection<FineWithId> Fines { get; set; } = [];
     
     private readonly ClientHandler _clientHandler;
-    private readonly DebugWindow _debugWindow = new();
+    private readonly DebugWindow _driversDebugWindow = new();
+    private readonly DebugWindow _finesDebugWindow = new();
     
     public MainWindow(ClientHandler clientHandler)
     {
@@ -27,7 +28,8 @@ public partial class MainWindow
         InitEvents();
         _clientHandler.Start();
 
-        _debugWindow.Log("Интерфейс инициализирован");
+        _driversDebugWindow.Title = "Откладка ХТ";
+        _finesDebugWindow.Title = "Откладка КЧ дерева";
     }
 
     private void InitEvents()
@@ -94,15 +96,24 @@ public partial class MainWindow
             Fines.Clear();
         };
         
-        _clientHandler.LogMessage += _debugWindow.Log;
+        _clientHandler.DriversLogMessage += _driversDebugWindow.Log;
+        _clientHandler.FinesLogMessage += _finesDebugWindow.Log;
     }
     
-    private void DebugButton_Click(object sender, RoutedEventArgs e)
+    private void DebugDrivers_Click(object sender, RoutedEventArgs e)
     {
-        if (_debugWindow.IsVisible)
-            _debugWindow.Activate();
+        if (_driversDebugWindow.IsVisible)
+            _driversDebugWindow.Activate();
         else
-            _debugWindow.Show();
+            _driversDebugWindow.Show();
+    }
+    
+    private void DebugFines_Click(object sender, RoutedEventArgs e)
+    {
+        if (_finesDebugWindow.IsVisible)
+            _finesDebugWindow.Activate();
+        else
+            _finesDebugWindow.Show();
     }
 
     public void AddDriver_Click(object sender, RoutedEventArgs e)
@@ -138,6 +149,12 @@ public partial class MainWindow
         var selectedDrivers = DriversGrid.SelectedItems.Cast<Driver>().ToArray();
         if (selectedDrivers.Length <= 0)
             return;
+
+        if (selectedDrivers.Length == 1 && _clientHandler.HasFine(selectedDrivers[0].License))
+        {
+            ErrorWindow.Show(this, "Нельзя удалить водителя пока на него есть штрафы");
+            return;
+        }
         
         _clientHandler.RemoveDrivers(selectedDrivers);
     }

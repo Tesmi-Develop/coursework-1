@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace Coursework1;
 
@@ -30,24 +31,47 @@ public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
         _nil = new Node(default!) { Color = Color.Black };
         _root = _nil;
     }
-
-    public void PrintTree()
-    {
-        PrintTreeInternal(_root);
-    }
     
-    private void PrintTreeInternal(Node node, string indent = "", bool isLeft = true, bool isFirstCall = true)
+    public string ToVisualString()
+    {
+        if (_root == _nil)
+            return "Tree is empty";
+
+        var sb = new StringBuilder();
+        BuildString(_root, sb, "", true, true);
+        return sb.ToString();
+    }
+
+    private void BuildString(Node node, StringBuilder sb, string indent, bool isLeft, bool isRoot)
     {
         if (node == _nil)
             return;
 
         if (node.Right != _nil)
-            PrintTreeInternal(node.Right, indent + (isLeft && !isFirstCall ? "│   " : "    "), false, false);
+        {
+            BuildString(node.Right, sb, indent + (isLeft && !isRoot ? "│   " : "    "), false, false);
+        }
 
-        Console.WriteLine(indent + (isFirstCall ? "    " : (isLeft ? "└── " : "┌── ")) + node.Key + $"({node.Color})");
+        sb.Append(indent);
+    
+        if (!isRoot)
+        {
+            sb.Append(isLeft ? "└── " : "┌── ");
+        }
+        else
+        {
+            sb.Append("─── ");
+        }
 
+        var valuesList = string.Join(", ", node.Values.AsEnumerable());
+        var colorMark = node.Color == Color.Red ? "R" : "B";
+
+        sb.AppendLine($"[{colorMark}] {node.Key}: {{{valuesList}}}");
+        
         if (node.Left != _nil)
-            PrintTreeInternal(node.Left, indent + (isLeft || isFirstCall ? "    " : "│   "), true, false);
+        {
+            BuildString(node.Left, sb, indent + (!isLeft || isRoot ? "    " : "│   "), true, false);
+        }
     }
 
     public List<Node> RightLeftTraversal()

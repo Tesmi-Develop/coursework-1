@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
 using Coursework1.Data;
@@ -14,27 +13,42 @@ public class FineDatabase : IEnumerable<Fine>
     private readonly RedBlackTree<DriverLicense, int> _indexesByDriverLicenses = new();
     private readonly DynamicArray<Fine> _fines = [];
 
+    public event Action<string>? LogMessage;
+
+    private void Log(string message) => LogMessage?.Invoke(message);
+
     public int Count => _fines.Count;
     
     public FineWithId Add(Fine fine)
     {
+        Log($"[ADD] {fine.License} | {fine.Date}");
+        
         _fines.Add(fine);
-        _indexesByDateTime.Insert(fine.Date, _fines.Count - 1);
-        _indexesByDriverLicenses.Insert(fine.License, _fines.Count - 1);
+        var newIndex = _fines.Count - 1;
+        
+        _indexesByDateTime.Insert(fine.Date, newIndex);
+        _indexesByDriverLicenses.Insert(fine.License, newIndex);
 
-        return new FineWithId { Fine = fine, Id = _fines.Count - 1 };
+        Log($"[SUCCESS] ID: {newIndex}");
+        Log(_indexesByDriverLicenses.ToVisualString());
+        return new FineWithId { Fine = fine, Id = newIndex };
     }
     
     public Fine[] CreateReport(ReportCriteria reportCriteria, Predicate<Fine> predicate)
     {
-        var indexes = _indexesByDateTime.GetValuesInRange(reportCriteria.From, reportCriteria.To, (index) => predicate(_fines[index]));
-        var result = new Fine[indexes.Length];
+        Log($"[REPORT] {reportCriteria.From} - {reportCriteria.To}");
         
-        var currentIndex = 0;
-        foreach (var index in indexes)
+        var indexes = _indexesByDateTime.GetValuesInRange(
+            reportCriteria.From, 
+            reportCriteria.To, 
+            index => predicate(_fines[index]));
+        
+        Log($"[REPORT] Found: {indexes.Length}");
+        
+        var result = new Fine[indexes.Length];
+        for (var i = 0; i < indexes.Length; i++)
         {
-            result[currentIndex] = _fines[index];
-            currentIndex++;
+            result[i] = _fines[indexes[i]];
         }
         
         return result;
@@ -42,44 +56,60 @@ public class FineDatabase : IEnumerable<Fine>
 
     public FineWithId[] Search(DriverLicense license)
     {
-        if (!_indexesByDriverLicenses.TryFind(license, out var indexes))
-            return [];
-
-        var result = new FineWithId[indexes.Count];
-        int currentIndex = 0;
+        Log($"[SEARCH] {license}");
         
-        foreach (var index in indexes)
+        if (!_indexesByDriverLicenses.TryFind(license, out var indexes))
         {
-            result[currentIndex] = new FineWithId { Id = index, Fine = _fines[index] };
-            currentIndex++;
+            Log($"[NOT FOUND] {license}");
+            return [];
         }
 
+        var result = new FineWithId[indexes.Count];
+        var current = 0;
+        foreach (var index in indexes)
+        {
+            result[current++] = new FineWithId { Id = index, Fine = _fines[index] };
+        }
+
+        Log($"[FOUND] Count: {result.Length}");
         return result;
     }
+    
+    public bool HasLicense(DriverLicense license)
+    {
+        return _indexesByDriverLicenses.TryFind(license, out var indexes) && !indexes.Empty;
+    }
 
-    public bool TryRemove(int index, 
-        out FineWithId removed,
-        out FineWithId? replacer)
+    public bool TryRemove(int index, out FineWithId removed, out FineWithId? replacer)
     {
         removed = default;
         replacer = null;
         
+        Log($"[REMOVE] ID: {index}");
+        
         if (index < 0 || index >= _fines.Count)
+        {
+            Log($"[FAIL] Out of range: {index}");
             return false;
+        }
         
         var record = _fines[index];
         
         if (!_indexesByDateTime.TryRemove(record.Date, index, out _))
+        {
+            Log($"[ERROR] Index sync failed: {index}");
             return false;
+        }
 
         _indexesByDriverLicenses.TryRemove(record.License, index, out _);
         
         var lastIndex = _fines.Count - 1;
-        removed = new FineWithId { Id = lastIndex, Fine = _fines[lastIndex] };
+        var lastRecord = _fines[lastIndex];
+        removed = new FineWithId { Id = lastIndex, Fine = lastRecord };
 
         if (index != lastIndex)
         {
-            var lastRecord =  _fines[lastIndex];
+            Log($"[SWAP] {lastIndex} -> {index}");
             
             _indexesByDateTime.Replace(lastRecord.Date, lastIndex, index);
             _indexesByDriverLicenses.Replace(lastRecord.License, lastIndex, index);
@@ -88,103 +118,82 @@ public class FineDatabase : IEnumerable<Fine>
         }
 
         _fines.RemoveAt(lastIndex);
+        Log($"[SUCCESS] Remaining: {_fines.Count}");
+        Log(_indexesByDriverLicenses.ToVisualString());
         return true;
     }
 
-    public IEnumerator<Fine> GetEnumerator()
-    {
-        return _fines.GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
-    
     public bool TryImport(string filePath, FinePredicate<Fine> validateFine, out string error)
     {
+        Log($"[IMPORT] {filePath}");
         error = string.Empty;
 
         if (!File.Exists(filePath))
         {
-            error = $"Файл по пути '{filePath}' не найден";
+            error = "File not found";
+            Log($"[FAIL] {error}");
             return false;
         }
 
-        string fileContent;
-        
         try
         {
-            fileContent = File.ReadAllText(filePath);
+            var content = File.ReadAllText(filePath);
+            var fines = JsonSerializer.Deserialize<Fine[]>(content);
+
+            if (fines == null) return true;
+
+            Log($"[IMPORT] Validating {fines.Length} items...");
+
+            foreach (var fine in fines)
+            {
+                if (validateFine(fine, out error)) continue;
+                Log($"[VALIDATION FAIL] {fine.License}: {error}");
+                return false;
+            }
+
+            foreach (var fine in fines) Add(fine);
+            
+            Log("[SUCCESS] Import completed");
+            Log(_indexesByDriverLicenses.ToVisualString());
+            return true;
         }
         catch (Exception e)
         {
-            error = $"Ошибка при открытии файла: {e.Message}";
+            error = e.Message;
+            Log($"[ERROR] {e.Message}");
             return false;
         }
-        
-        Fine[] fines;
-
-        try
-        {
-            fines = JsonSerializer.Deserialize<Fine[]>(fileContent) ?? [];
-        }
-        catch (JsonException e)
-        {
-            error = $"Ошибка при десериализации JSON: строка: {e.LineNumber + 1}, позиция: {e.BytePositionInLine}: {e.Message}";
-            return false;
-        }
-
-        foreach (var fine in fines)
-        {
-            if (validateFine(fine, out error))
-                continue;
-
-            return false;
-        }
-
-        foreach (var fine in fines)
-            Add(fine);
-        
-        return true;
     }
     
     public bool TryExport(string filePath, out string error)
     {
+        Log($"[EXPORT] {filePath}");
         error = string.Empty;
-        string output;
-        var drivers = new Fine[_fines.Count];
-        var i = 0;
-
-        foreach (var val in _fines)
-            drivers[i++] = val;
-        
-        var options = new JsonSerializerOptions
-        {
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            WriteIndented = true
-        };
         
         try
         {
-            output = JsonSerializer.Serialize(drivers, options);
-        }
-        catch (Exception e)
-        {
-            error = $"Ошибка при сериализации данных в JSON: {e}";
-            return false;
-        }
+            var options = new JsonSerializerOptions
+            {
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true
+            };
+            
+            var data = new Fine[_fines.Count];
+            for (var i = 0; i < _fines.Count; i++) data[i] = _fines[i];
 
-        try
-        {
-            File.WriteAllText(filePath, output);
+            File.WriteAllText(filePath, JsonSerializer.Serialize(data, options));
+            
+            Log($"[SUCCESS] Exported: {data.Length}");
+            return true;
         }
         catch (Exception e)
         {
-            error = $"Ошибка при записи данных в файл: {e}";
+            error = e.Message;
+            Log($"[ERROR] {e.Message}");
             return false;
         }
-        
-        return true;
     }
+
+    public IEnumerator<Fine> GetEnumerator() => _fines.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

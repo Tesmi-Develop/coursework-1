@@ -37,17 +37,6 @@
             <StatusBarItem Grid.Column="0">
                 <TextBlock Text="Готово" Foreground="Gray" FontSize="11"/>
             </StatusBarItem>
-
-            <StatusBarItem Grid.Column="1">
-                <Button Content="Debug" 
-                        Padding="10,0" 
-                        Background="Transparent" 
-                        BorderThickness="0" 
-                        Foreground="Gray"
-                        FontSize="11"
-                        Click="DebugButton_Click"
-                        Cursor="Hand"/>
-            </StatusBarItem>
         </StatusBar>
 
         <Grid Margin="10">
@@ -60,11 +49,22 @@
             <GroupBox Header="Водители" Grid.Column="0">
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Background="#F3F3F3" BorderBrush="#DCDCDC" BorderThickness="0,0,0,1" Margin="0,0,0,5">
-                        <StackPanel Orientation="Horizontal" Margin="5">
-                            <TextBlock Text="Поиск по ВУ:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <TextBox x:Name="SearchInDrivers" Width="150" VerticalContentAlignment="Center"/>
-                            <Button Content="Найти" Margin="5,0" Padding="10,2" Click="FindDriver_Click"/>
-                        </StackPanel>
+                        <Grid Margin="5">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Поиск по ВУ:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBox x:Name="SearchInDrivers" Width="150" VerticalContentAlignment="Center"/>
+                                <Button Content="Найти" Margin="5,0" Padding="10,2" Click="FindDriver_Click"/>
+                            </StackPanel>
+                            
+                            <Button Content="Debug (HT)" 
+                                    HorizontalAlignment="Right"
+                                    Background="Transparent" 
+                                    BorderThickness="0" 
+                                    Foreground="#A0A0A0"
+                                    FontSize="10"
+                                    Click="DebugDrivers_Click"
+                                    Cursor="Hand"/>
+                        </Grid>
                     </Border>
                     
                     <DataGrid x:Name="DriversGrid" ItemsSource="{Binding Drivers}" 
@@ -91,11 +91,22 @@
             <GroupBox Header="Штрафы" Grid.Column="2">
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Background="#F3F3F3" BorderBrush="#DCDCDC" BorderThickness="0,0,0,1" Margin="0,0,0,5">
-                        <StackPanel Orientation="Horizontal" Margin="5">
-                            <TextBlock Text="Поиск по ВУ:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <TextBox x:Name="SearchInFines" Width="150" VerticalContentAlignment="Center"/>
-                            <Button Click="FindFines_Click" Content="Найти" Margin="5,0" Padding="10,2"/>
-                        </StackPanel>
+                        <Grid Margin="5">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Поиск по ВУ:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBox x:Name="SearchInFines" Width="150" VerticalContentAlignment="Center"/>
+                                <Button Click="FindFines_Click" Content="Найти" Margin="5,0" Padding="10,2"/>
+                            </StackPanel>
+
+                            <Button Content="Debug (RBT)" 
+                                    HorizontalAlignment="Right"
+                                    Background="Transparent" 
+                                    BorderThickness="0" 
+                                    Foreground="#A0A0A0"
+                                    FontSize="10"
+                                    Click="DebugFines_Click"
+                                    Cursor="Hand"/>
+                        </Grid>
                     </Border>
 
                     <DataGrid x:Name="FinesGrid" ItemsSource="{Binding Fines}" 
@@ -111,7 +122,7 @@
                             <DataGridTextColumn Header="Серия/Номер ВУ" Binding="{Binding Fine.License}" Width="Auto"/>
                             <DataGridTextColumn Header="Нарушение" Binding="{Binding Fine.Article}" Width="*"/>
                             <DataGridTextColumn Header="Сумма" Binding="{Binding Fine.Price}" Width="Auto"/>
-                            <DataGridTextColumn Header="Дата нарушения" Binding="{Binding Fine.Date}" Width="Auto"/>
+                            <DataGridTextColumn Header="Дата нарушения" Binding="{Binding Fine.Date, StringFormat=\{0:dd.MM.yyyy\}}" Width="Auto"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>
