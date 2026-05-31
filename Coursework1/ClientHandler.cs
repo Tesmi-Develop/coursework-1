@@ -16,6 +16,8 @@ public class ClientHandler
     
     public event Action<string>? DriversLogMessage;
     public event Action<string>? FinesLogMessage;
+
+    public event Action<string>? ChangedStatus; 
     
     private readonly DriverDatabase _driverDatabase;
     private readonly FineDatabase _fineDatabase;
@@ -161,15 +163,20 @@ public class ClientHandler
     {
         _isEnabledSearchInDrivers = true;
         ClearDrivers?.Invoke();
-        if (license == DriverLicense.Invalid || !_driverDatabase.TryFind(license, out var foundDriver))
+        if (license == DriverLicense.Invalid || !_driverDatabase.TryFind(license, out var foundDriver, out var steps))
             return;
 
+        ChangedStatus?.Invoke($"Поиск водителя | Шагов поиска: {steps}");
         DriverAdded?.Invoke(foundDriver);
     }
     
     public void DisableSearchInDrivers()
     {
         _isEnabledSearchInDrivers = false;
+        
+        if (!_isEnabledSearchInFines)
+            ChangedStatus?.Invoke(string.Empty);
+        
         SyncDrivers();
     }
     
@@ -178,11 +185,12 @@ public class ClientHandler
         _isEnabledSearchInFines = true;
         _filterInFines = license;
         ClearFines?.Invoke();
-        if (license == DriverLicense.Invalid || !_driverDatabase.TryFind(license, out _))
+        if (license == DriverLicense.Invalid)
             return;
 
-        var result = _fineDatabase.Search(license);
+        var result = _fineDatabase.Search(license, out var steps);
 
+        ChangedStatus?.Invoke($"Поиск штрафов | Шагов поиска: {steps}");
         foreach (var fine in result)
             FineAdded?.Invoke(fine);
     }
@@ -191,6 +199,10 @@ public class ClientHandler
     {
         _isEnabledSearchInFines = false;
         _filterInFines = null;
+        
+        if (!_isEnabledSearchInDrivers)
+            ChangedStatus?.Invoke(string.Empty);
+        
         SyncFines();
     }
 

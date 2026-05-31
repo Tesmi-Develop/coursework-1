@@ -525,7 +525,32 @@ public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
         
         return x;
     }
+    
+    private Node FindInternal(Node x, TKey key, out int steps)
+    {
+        steps = 0;
+        
+        while (x != _nil && key.CompareTo(x.Key) != 0)
+        {
+            steps++;
+            x = key.CompareTo(x.Key) < 0 ? x.Left : x.Right;
+        }
 
+        return x;
+    }
+
+    public bool TryFind(TKey key, [MaybeNullWhen(false)] out DoubleLinkedList<TValue> result, out int steps)
+    {
+        result = null;
+        
+        var node = FindInternal(_root, key, out steps);
+        if (node == _nil || node.Values.Empty)
+            return false;
+
+        result = node.Values;
+        return true;
+    }
+    
     public bool TryFind(TKey key, [MaybeNullWhen(false)] out DoubleLinkedList<TValue> result)
     {
         result = null;

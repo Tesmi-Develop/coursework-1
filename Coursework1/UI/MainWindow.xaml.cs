@@ -98,6 +98,11 @@ public partial class MainWindow
         
         _clientHandler.DriversLogMessage += _driversDebugWindow.Log;
         _clientHandler.FinesLogMessage += _finesDebugWindow.Log;
+
+        _clientHandler.ChangedStatus += s =>
+        {
+            StatusText.Text = string.IsNullOrEmpty(s) ? "Здесь могла быть ваша реклама" : s;
+        };
     }
     
     private void DebugDrivers_Click(object sender, RoutedEventArgs e)

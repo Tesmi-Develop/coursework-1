@@ -54,11 +54,11 @@ public class FineDatabase : IEnumerable<Fine>
         return result;
     }
 
-    public FineWithId[] Search(DriverLicense license)
+    public FineWithId[] Search(DriverLicense license, out int steps)
     {
         Log($"[SEARCH] {license}");
         
-        if (!_indexesByDriverLicenses.TryFind(license, out var indexes))
+        if (!_indexesByDriverLicenses.TryFind(license, out var indexes, out steps))
         {
             Log($"[NOT FOUND] {license}");
             return [];
@@ -140,13 +140,15 @@ public class FineDatabase : IEnumerable<Fine>
             var content = File.ReadAllText(filePath);
             var fines = JsonSerializer.Deserialize<Fine[]>(content);
 
-            if (fines == null) return true;
+            if (fines == null) 
+                return true;
 
             Log($"[IMPORT] Validating {fines.Length} items...");
 
             foreach (var fine in fines)
             {
-                if (validateFine(fine, out error)) continue;
+                if (validateFine(fine, out error)) 
+                    continue;
                 Log($"[VALIDATION FAIL] {fine.License}: {error}");
                 return false;
             }
@@ -157,10 +159,10 @@ public class FineDatabase : IEnumerable<Fine>
             Log(_indexesByDriverLicenses.ToVisualString());
             return true;
         }
-        catch (Exception e)
+        catch (JsonException e)
         {
-            error = e.Message;
-            Log($"[ERROR] {e.Message}");
+            error = $"Ошибка при десериализации JSON: строка: {e.LineNumber + 1}, позиция: {e.BytePositionInLine}: {e.Message}";
+            Log($"[ERROR] {error}");
             return false;
         }
     }

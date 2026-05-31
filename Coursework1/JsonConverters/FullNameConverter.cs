@@ -9,9 +9,10 @@ public class FullNameConverter : JsonConverter<FullName>
 {
     public override FullName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        using var jsonDoc = JsonDocument.ParseValue(ref reader);
-        var input = jsonDoc.RootElement.GetString() ?? string.Empty;
-
+        if (reader.TokenType != JsonTokenType.String)
+            throw new JsonException("Ожидалась строка ФИО.");
+        
+        var input = reader.GetString() ?? string.Empty;
         var split = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (split.Length != 3)
             throw new JsonException("Некорректное ФИО");

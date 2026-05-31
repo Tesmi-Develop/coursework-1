@@ -11,11 +11,7 @@ public class FormattedDateConverter : JsonConverter<FormattedDate>
         if (reader.TokenType != JsonTokenType.String)
             throw new JsonException($"Ожидалась строка даты.");
         
-        var input = reader.GetString();
-        
-        if (string.IsNullOrWhiteSpace(input))
-            return default;
-        
+        var input = reader.GetString() ?? string.Empty;
         if (!FormattedDate.TryParse(input, out var result, out var errorMessage))
             throw new JsonException(errorMessage);
 

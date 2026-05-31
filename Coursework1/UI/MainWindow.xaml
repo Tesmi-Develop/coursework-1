@@ -35,7 +35,7 @@
             </StatusBar.ItemsPanel>
 
             <StatusBarItem Grid.Column="0">
-                <TextBlock Text="Готово" Foreground="Gray" FontSize="11"/>
+                <TextBlock x:Name="StatusText" Text="Здесь могла быть ваша реклама" Foreground="Gray" FontSize="11"/>
             </StatusBarItem>
         </StatusBar>
 

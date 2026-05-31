@@ -72,6 +72,20 @@ public class DriverDatabase : IFileDataHandler
 
         return success;
     }
+    
+    public bool TryFind(DriverLicense license, out Driver driver, out int steps)
+    {
+        Log($"[FIND] Поиск: {license}");
+        
+        var found = _drivers.Find(license, out driver, out steps);
+
+        if (found)
+            Log($"[FOUND] Найден: {driver.FullName}");
+        else
+            Log("[NOT FOUND] Не найден.");
+
+        return found;
+    }
 
     public bool TryFind(DriverLicense license, out Driver driver)
     {

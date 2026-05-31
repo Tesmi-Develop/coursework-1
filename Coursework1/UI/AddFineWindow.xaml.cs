@@ -52,8 +52,14 @@ public partial class AddFineWindow : Window
             ErrorWindow.Show(this, "Данного водителя не существует в базе");
             return;
         }
-        
-        CreatedFine = new Fine(license, ViolationTitleBox.Text, amount, ViolationDatePicker.SelectedDate.Value);
+
+        CreatedFine = new Fine
+        {
+            License = license,
+            Article = ViolationTitleBox.Text,
+            Price = amount,
+            Date = ViolationDatePicker.SelectedDate.Value
+        };
         DialogResult = true;
     }
     
