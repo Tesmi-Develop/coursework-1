@@ -213,7 +213,7 @@ public class ClientHandler
             if (!_driverDatabase.TryFind(fine.License, out var driver))
                 throw new Exception("Driver not found");
 
-            return reportCriteria.FullName == driver.FullName && reportCriteria.Amount == fine.Price;
+            return reportCriteria.FullName == driver.FullName && reportCriteria.Amount <= fine.Price;
         });
         
         var result = new ReportItem[fines.Length];

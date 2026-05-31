@@ -19,6 +19,11 @@ public readonly record struct FormattedDate(DateTime Value)
         return $"{Value.Day:D2} {month} {Value.Year}";
     }
 
+    public static bool TryParse(string input, out FormattedDate result)
+    {
+        return TryParse(input, out result, out _);
+    }
+
     public static bool TryParse(string input, out FormattedDate result, out string error)
     {
         result = default;
@@ -57,8 +62,35 @@ public readonly record struct FormattedDate(DateTime Value)
             }
         }
 
-        result = new FormattedDate(new DateTime(year, monthIndex, day));
-        return true;
+        if (year < 1 || year > 9999)
+        {
+            error = "Недопустимый год";
+            return false;
+        }
+
+        if (monthIndex < 1 || monthIndex > 12)
+        {
+            error = "Недопустимый месяц";
+            return false;
+        }
+
+        int daysInMonth = DateTime.DaysInMonth(year, monthIndex);
+        if (day < 1 || day > daysInMonth)
+        {
+            error = $"Недопустимый день для месяца {monthStr} (максимум {daysInMonth})";
+            return false;
+        }
+
+        try
+        {
+            result = new FormattedDate(new DateTime(year, monthIndex, day));
+            return true;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            error = "Недопустимая дата";
+            return false;
+        }
     }
 
     public static implicit operator FormattedDate(DateTime dt) => new(dt);

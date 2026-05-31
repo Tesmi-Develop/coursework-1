@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Coursework1.Data;
 using Coursework1.Utilities;
@@ -16,6 +18,13 @@ public partial class ReportWindow
         
         StartDatePicker.SelectedDate = DateTime.Now.AddMonths(-1);
         EndDatePicker.SelectedDate = DateTime.Now;
+    }
+    
+    private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var picker = sender as DatePicker;
+        if (picker?.Template.FindName("PART_TextBox", picker) is DatePickerTextBox textBox && picker?.SelectedDate != null)
+            textBox.Text = ((FormattedDate)picker.SelectedDate.Value).ToString();
     }
 
     private void GenerateReport_Click(object sender, RoutedEventArgs e)
@@ -35,7 +44,7 @@ public partial class ReportWindow
         var amount = 0;
         if (!string.IsNullOrWhiteSpace(MinAmountBox.Text))
         {
-            if (!int.TryParse(MinAmountBox.Text, out amount))
+            if (!int.TryParse(MinAmountBox.Text, out amount) || amount < 0)
             {
                 ErrorWindow.Show(this, "Введите корректную сумму");
                 return;
