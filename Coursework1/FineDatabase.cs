@@ -36,22 +36,23 @@ public class FineDatabase : IEnumerable<Fine>
     
     public Fine[] CreateReport(ReportCriteria reportCriteria, Predicate<Fine> predicate)
     {
-        Log($"[REPORT] {reportCriteria.From} - {reportCriteria.To}");
+        Log($"[REPORT] {reportCriteria.Date}");
+
+        if (!_indexesByDateTime.TryFind(reportCriteria.Date, out var indexes))
+            return [];
         
-        var indexes = _indexesByDateTime.GetValuesInRange(
-            reportCriteria.From, 
-            reportCriteria.To, 
-            index => predicate(_fines[index]));
+        Log($"[REPORT] Found: {indexes.Count}");
         
-        Log($"[REPORT] Found: {indexes.Length}");
-        
-        var result = new Fine[indexes.Length];
-        for (var i = 0; i < indexes.Length; i++)
+        var result = new DynamicArray<Fine>(indexes.Count);
+        foreach (var index in indexes)
         {
-            result[i] = _fines[indexes[i]];
+            if (!predicate(_fines[index]))
+                continue;
+            
+            result.Add(_fines[index]);
         }
         
-        return result;
+        return result.ToArray();
     }
 
     public FineWithId[] Search(DriverLicense license, out int steps)
@@ -149,6 +150,7 @@ public class FineDatabase : IEnumerable<Fine>
             {
                 if (validateFine(fine, out error)) 
                     continue;
+                
                 Log($"[VALIDATION FAIL] {fine.License}: {error}");
                 return false;
             }

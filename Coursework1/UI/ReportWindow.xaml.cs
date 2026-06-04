@@ -16,8 +16,7 @@ public partial class ReportWindow
     {
         InitializeComponent();
         
-        StartDatePicker.SelectedDate = DateTime.Now.AddMonths(-1);
-        EndDatePicker.SelectedDate = DateTime.Now;
+        DatePicker.SelectedDate = DateTime.Now;
     }
     
     private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
@@ -29,15 +28,9 @@ public partial class ReportWindow
 
     private void GenerateReport_Click(object sender, RoutedEventArgs e)
     {
-        if (!StartDatePicker.SelectedDate.HasValue || !EndDatePicker.SelectedDate.HasValue)
+        if (!DatePicker.SelectedDate.HasValue)
         {
-            ErrorWindow.Show(this, "Даты не выбраны");
-            return;
-        }
-        
-        if (StartDatePicker.SelectedDate > EndDatePicker.SelectedDate)
-        {
-            ErrorWindow.Show(this, "Дата 'От' не может быть больше даты 'До'");
+            ErrorWindow.Show(this, "Дата не выбрана");
             return;
         }
         
@@ -62,8 +55,7 @@ public partial class ReportWindow
         {
             FullName = fullName,
             Amount = amount,
-            From = StartDatePicker.SelectedDate!.Value,
-            To = EndDatePicker.SelectedDate!.Value
+            Date = DatePicker.SelectedDate!.Value,
         };
 
         DialogResult = true;

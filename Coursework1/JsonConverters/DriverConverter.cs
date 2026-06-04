@@ -27,7 +27,7 @@ public class DriverConverter : JsonConverter<Driver>
             if (reader.TokenType != JsonTokenType.PropertyName)
                 throw new JsonException("Ожидалось название свойства.");
 
-            string propertyName = reader.GetString();
+            var propertyName = reader.GetString();
             
             if (!RequiredFields.Contains(propertyName))
                 throw new JsonException($"Обнаружено лишнее или неверное поле: '{propertyName}'. Разрешены только: License, FullName, Categories.");
