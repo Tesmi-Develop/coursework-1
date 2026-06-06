@@ -5,7 +5,7 @@ namespace Coursework1;
 public class ClientHandler
 {
     public event Action<Driver>? DriverAdded;
-    public event Action<Driver>? DriverRemoved;
+    public event Action<Driver, Driver?>? DriverRemoved; // removed, replacer
     public event Action<Driver[]>? FullUpdateDrivers;
     public event Action? ClearDrivers;
 
@@ -85,9 +85,9 @@ public class ClientHandler
         return _driverDatabase.GetAllDrivers();
     }
 
-    public bool TrySetHashTableSettings(int capacity, int step)
+    public bool TrySetHashTableSettings(int capacity)
     {
-        return _driverDatabase.TrySetSettings(capacity,  step);
+        return _driverDatabase.TrySetSettings(capacity);
     }
     
     public bool AddDriver(Driver driver)
@@ -114,10 +114,13 @@ public class ClientHandler
 
     public void RemoveDriver(DriverLicense license)
     {
-        if (_fineDatabase.HasLicense(license) || !_driverDatabase.Remove(license, out var driver))
+        if (_fineDatabase.HasLicense(license) || !_driverDatabase.Remove(license, out var driver, out var replacer))
             return;
+
+        if (_isEnabledSearchInDrivers)
+            replacer = null;
         
-        DriverRemoved?.Invoke(driver);
+        DriverRemoved?.Invoke(driver, replacer);
     }
 
     public bool AddFine(Fine fine)

@@ -39,9 +39,38 @@ public partial class MainWindow
             Drivers.Add(driver);
         };
 
-        _clientHandler.DriverRemoved += driver =>
+        _clientHandler.DriverRemoved += (removed, replacer) =>
         {
-            Drivers.Remove(driver);
+            if (Drivers.Count == 0)
+                return;
+
+            var replacedId = -1;
+            for (var i = 0; i < Drivers.Count; i++)
+            {
+                if (Drivers[i].License != removed.License) 
+                    continue;
+
+                if (replacer.HasValue)
+                {
+                    Drivers[i] = replacer.Value;
+                    replacedId = i;
+                    break;
+                }
+                
+                Drivers.RemoveAt(i);
+            }
+            
+            if (!replacer.HasValue)
+                return;
+            
+            for (var i = replacedId != -1 ? replacedId + 1 : 0; i < Drivers.Count; i++)
+            {
+                if (Drivers[i].License != replacer.Value.License) 
+                    continue;
+                
+                Drivers.RemoveAt(i);
+                break;
+            }
         };
 
         _clientHandler.ClearDrivers += () =>
@@ -157,7 +186,7 @@ public partial class MainWindow
 
         if (selectedDrivers.Length == 1 && _clientHandler.HasFine(selectedDrivers[0].License))
         {
-            ErrorWindow.Show(this, "Нельзя удалить водителя пока на него есть штрафы");
+            ErrorWindow.Show(this, "Нельзя удалить водителя пока у него есть штрафы");
             return;
         }
         
@@ -189,7 +218,7 @@ public partial class MainWindow
         if (settingsWindow.ShowDialog() != true || !settingsWindow.IsSuccess)
             return;
 
-        if (!_clientHandler.TrySetHashTableSettings(settingsWindow.Capacity, settingsWindow.Step))
+        if (!_clientHandler.TrySetHashTableSettings(settingsWindow.Capacity))
         {
             ErrorWindow.Show(this,"Нельзя задать параметры ХТ когда есть записи");
         }

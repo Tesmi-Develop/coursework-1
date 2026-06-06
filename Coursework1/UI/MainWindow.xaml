@@ -11,7 +11,6 @@
                 <MenuItem Header="Экспорт" Click="ExportDriversButton_Click"/>
                 <MenuItem Header="Добавить" Click="AddDriver_Click"/>
                 <MenuItem Header="Удалить выбранное" Click="RemoveDrivers_Click" />
-                <MenuItem Header="Отчёт" Click="ReportCreate_Click"/>
                 <MenuItem Header="Задать размер ХТ" Click="SetHashTableCapacity_Click" />
             </MenuItem>
             <MenuItem Header="Штрафы">
@@ -20,6 +19,7 @@
                 <MenuItem Header="Добавить" Click="AddFine_Click" />
                 <MenuItem Header="Удалить выбранное" Click="RemoveFines_Click" />
             </MenuItem>
+            <MenuItem Header="Отчёт" Click="ReportCreate_Click" />
         </Menu>
 
         <StatusBar DockPanel.Dock="Bottom">
@@ -59,8 +59,7 @@
                             <Button Content="Debug (HT)" 
                                     HorizontalAlignment="Right"
                                     Background="Transparent" 
-                                    BorderThickness="0" 
-                                    Foreground="#A0A0A0"
+                                    BorderThickness="0"
                                     FontSize="10"
                                     Click="DebugDrivers_Click"
                                     Cursor="Hand"/>
@@ -101,8 +100,7 @@
                             <Button Content="Debug (RBT)" 
                                     HorizontalAlignment="Right"
                                     Background="Transparent" 
-                                    BorderThickness="0" 
-                                    Foreground="#A0A0A0"
+                                    BorderThickness="0"
                                     FontSize="10"
                                     Click="DebugFines_Click"
                                     Cursor="Hand"/>

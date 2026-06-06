@@ -6,115 +6,127 @@ using Coursework1.Data;
 
 namespace Coursework1;
 
-public class DriverDatabase : IFileDataHandler
+public class DriverDatabase
 {
     public int Count => _drivers.Count;
     public event Action<string>? LogMessage;
 
-    private HashTable<DriverLicense, Driver> _drivers = new();
+    private HashTable<DriverLicense, int> _indexesByLicense = new();
+    private readonly DynamicArray<Driver> _drivers = [];
 
     private void Log(string message)
     {
         LogMessage?.Invoke(message);
     }
 
-    public bool TrySetSettings(int capacity, int step)
+    public bool TrySetSettings(int capacity)
     {
         if (_drivers.Count > 0)
             return false;
-
-        _drivers = new HashTable<DriverLicense, Driver>(capacity, step);
-        Log($"[INIT] Успещно применены настройки для ХТ: capacity = {capacity}, step = {step}");
+        
+        var oldHashTable = _indexesByLicense;
+        _indexesByLicense = new HashTable<DriverLicense, int>(capacity);
+        
+        Log($"[INIT] Успешно применены настройки для ХТ: capacity = {capacity}");
         return true;
     }
 
     public bool Has(DriverLicense license)
     {
-        return _drivers.ContainsKey(license);
+        return _indexesByLicense.ContainsKey(license);
     }
 
     public bool TryAdd(Driver driver)
     {
         Log($"[ADD] Попытка добавления: {driver.License}");
         
-        if (_drivers.ContainsKey(driver.License))
+        if (_indexesByLicense.ContainsKey(driver.License))
         {
             Log($"[FAIL] Ключ {driver.License} уже существует.");
             return false;
         }
-
-        var success = _drivers.Add(driver.License, driver);
         
-        if (success)
+        var newIndex = _drivers.Count;
+        
+        if (_indexesByLicense.Add(driver.License, newIndex))
         {
-            Log($"[SUCCESS] Добавлен: {driver.License}");
-            Log(_drivers.PrintDebugInfo());
+            _drivers.Add(driver);
+            Log($"[SUCCESS] Добавлен: {driver.License}, ID: {newIndex}");
+            Log(_indexesByLicense.PrintDebugInfo());
+            return true;
         }
-        else
-            Log("[ERROR] Ошибка добавления (таблица полна или конфликт).");
-
-        return success;
+        
+        Log("[ERROR] Ошибка добавления (таблица полна или конфликт).");
+        return false;
     }
 
-    public bool Remove(DriverLicense license, out Driver removedDriver)
+    public bool Remove(DriverLicense license, out Driver removedDriver, out Driver? replacer)
     {
-        Log($"[REMOVE] Попытка удаления: {license}");
+        removedDriver = default;
+        replacer = default;
         
-        var success = _drivers.Remove(license, out removedDriver);
-
-        if (success)
+        if (!_indexesByLicense.Remove(license, out var index))
         {
-            Log($"[SUCCESS] Удален: {removedDriver.License}");
-            Log(_drivers.PrintDebugInfo());
-        }
-        else
             Log($"[FAIL] Ключ {license} не найден.");
+            return false;
+        }
 
-        return success;
+        var lastIndex = _drivers.Count - 1;
+        removedDriver = _drivers[index];
+
+        if (index != lastIndex)
+        {
+            var lastDriver = _drivers[lastIndex];
+            
+            _indexesByLicense[lastDriver.License] = index;
+            _drivers[index] = lastDriver;
+            replacer = _drivers[index];
+        }
+        
+        _drivers.RemoveAt(lastIndex);
+        
+        Log($"[SUCCESS] Удален: {removedDriver.License}");
+        Log(_indexesByLicense.PrintDebugInfo());
+        return true;
     }
     
     public bool TryFind(DriverLicense license, out Driver driver, out int steps)
     {
-        Log($"[FIND] Поиск: {license}");
-        
-        var found = _drivers.Find(license, out driver, out steps);
-
-        if (found)
-            Log($"[FOUND] Найден: {driver.FullName}");
-        else
+        if (!_indexesByLicense.Find(license, out var index, out steps))
+        {
             Log("[NOT FOUND] Не найден.");
+            driver = default;
+            return false;
+        }
 
-        return found;
+        driver = _drivers[index];
+        Log($"[FOUND] Найден: {driver.FullName}");
+        return true;
     }
 
     public bool TryFind(DriverLicense license, out Driver driver)
     {
-        Log($"[FIND] Поиск: {license}");
-        
-        var found = _drivers.TryGetValue(license, out driver);
-
-        if (found)
-            Log($"[FOUND] Найден: {driver.FullName}");
-        else
+        if (!_indexesByLicense.TryGetValue(license, out var index))
+        {
             Log("[NOT FOUND] Не найден.");
+            driver = default;
+            return false;
+        }
 
-        return found;
+        driver = _drivers[index];
+        Log($"[FOUND] Найден: {driver.FullName}");
+        return true;
     }
 
     public IEnumerable<Driver> GetAllDrivers()
     {
-        return _drivers.Values;
+        return _drivers;
     }
     
     public bool TryExport(string filePath, out string error)
     {
         error = string.Empty;
         string output;
-        var drivers = new Driver[_drivers.Count];
-        var i = 0;
-
-        foreach (var val in _drivers.Values)
-            drivers[i++] = val;
         
         var options = new JsonSerializerOptions
         {
@@ -124,7 +136,7 @@ public class DriverDatabase : IFileDataHandler
         
         try
         {
-            output = JsonSerializer.Serialize(drivers, options);
+            output = JsonSerializer.Serialize(_drivers.ToArray(), options);
         }
         catch (Exception e)
         {
@@ -179,7 +191,8 @@ public class DriverDatabase : IFileDataHandler
             return false;
         }
         
-        var localHashTable = new HashTable<DriverLicense, Driver>(drivers.Length * 2);
+        var localHashTable = new HashTable<DriverLicense, int>();
+        var localArray = new DynamicArray<Driver>();
 
         foreach (var driver in drivers)
         {
@@ -189,15 +202,20 @@ public class DriverDatabase : IFileDataHandler
                 return false;
             }
             
-            localHashTable.Add(driver.License, driver);
+            localArray.Add(driver);
+            localHashTable.Add(driver.License, localArray.Count - 1);
         }
         
         _drivers.Clear();
+        _indexesByLicense.Clear();
 
-        foreach (var (key, value) in localHashTable)
-            _drivers.Add(key, value);
+        foreach (var driver in localArray)
+        {
+            _drivers.Add(driver);
+            _indexesByLicense.Add(driver.License, _drivers.Count - 1);
+        }
         
-        Log(_drivers.PrintDebugInfo());
+        Log(_indexesByLicense.PrintDebugInfo());
         return true;
     }
 }

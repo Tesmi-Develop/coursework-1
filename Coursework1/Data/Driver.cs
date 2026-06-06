@@ -4,7 +4,7 @@ using Coursework1.JsonConverters;
 namespace Coursework1.Data;
 
 [JsonConverter(typeof(DriverConverter))]
-public readonly record struct Driver
+public readonly struct Driver
 {
     public DriverLicense License { get; init; }
     public FullName FullName { get; init; }

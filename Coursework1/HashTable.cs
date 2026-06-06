@@ -41,14 +41,49 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
 
     private Entry[] _table;
     private int _capacity;
-    private readonly int _k;
+    private int _k;
+    private float LoadFactor => (float)Count / _capacity;
     private const double LoadFactorThreshold = 0.7;
+    private const double ShrinkThreshold = 0.2;
+    private const int MinCapacity = 1; 
 
-    public HashTable(int initialSize = 11, int step = 3)
+    public HashTable(int initialSize = 11)
     {
+        if (initialSize < MinCapacity)
+            throw new ArgumentOutOfRangeException(nameof(initialSize));
+        
         _capacity = initialSize;
-        _k = step;
+        _k = CalculateStep(_capacity);
         _table = new Entry[_capacity];
+    }
+    
+    private int CalculateStep(int capacity)
+    {
+        if (capacity <= 1) 
+            return 1;
+        
+        var step = capacity / 2 + 1;
+        
+        while (step > 1)
+        {
+            if (Gcd(step, capacity) == 1)
+                return step;
+            step--;
+        }
+        
+        return 1;
+    }
+    
+    
+    private static int Gcd(int a, int b)
+    {
+        while (b != 0)
+        {
+            var temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
     }
 
     private int MidSquareHash(TKey key, int m)
@@ -60,9 +95,19 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
         return middleBits % m;
     }
     
+    private int PrimaryHash(TKey key)
+    {
+        return MidSquareHash(key, _capacity);
+    }
+    
+    private int SecondaryHash(int currentIndex)
+    {
+        return (currentIndex + _k) % _capacity;
+    }
+
     private int GetIndex(TKey key, out int steps)
     {
-        var i = MidSquareHash(key, _capacity);
+        var i = PrimaryHash(key);
         var start = i;
         steps = 0;
 
@@ -71,8 +116,8 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
             steps++;
             if (_table[i].Key.Equals(key))
                 return i;
-
-            i = (i + _k) % _capacity;
+            
+            i = SecondaryHash(i);
             
             if (i == start) 
                 break;
@@ -84,15 +129,15 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     
     private int GetIndex(TKey key)
     {
-        var i = MidSquareHash(key, _capacity);
+        var i = PrimaryHash(key);
         var start = i;
 
         while (_table[i].IsOccupied)
         {
             if (_table[i].Key.Equals(key))
                 return i;
-
-            i = (i + _k) % _capacity;
+            
+            i = SecondaryHash(i);
             
             if (i == start) 
                 break;
@@ -101,12 +146,13 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
         return i; 
     }
 
-    private void Resize()
+    private void Resize(int newSize)
     {
         var oldTable = _table;
         var oldCapacity = _capacity;
         
-        _capacity = GetNextPrime(oldCapacity * 2);
+        _capacity = newSize;
+        _k = CalculateStep(_capacity);
         _table = new Entry[_capacity];
         Count = 0;
         
@@ -115,40 +161,8 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
             if (!oldTable[i].IsOccupied) 
                 continue;
             
-            var newIndex = GetIndex(oldTable[i].Key);
-            
-            _table[newIndex] = new Entry 
-            { 
-                Key = oldTable[i].Key, 
-                Value = oldTable[i].Value, 
-                IsOccupied = true 
-            };
-            Count++;
+            Add(oldTable[i].Key, oldTable[i].Value);
         }
-    }
-    
-    private int GetNextPrime(int min)
-    {
-        for (var i = min; ; i++)
-            if (IsPrime(i)) 
-                return i;
-    }
-
-    private bool IsPrime(int n)
-    {
-        if (n <= 1) 
-            return false;
-        if (n <= 3) 
-            return true;
-        
-        if (n % 2 == 0 || n % 3 == 0) 
-            return false;
-        
-        for (var i = 5; i * i <= n; i += 6)
-            if (n % i == 0 || n % (i + 2) == 0) 
-                return false;
-        
-        return true;
     }
     
     private void Update(TKey key, TValue value)
@@ -172,8 +186,11 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
             removedValue = _table[index].Value;
             _table[index] = new Entry { IsOccupied = false };
             Count--;
+            
+            if (LoadFactor < ShrinkThreshold && Count > MinCapacity)
+                Resize(_capacity / 2);
         
-            FixCluster((index + _k) % _capacity);
+            FixCluster(SecondaryHash(index));
             return true;
         }
 
@@ -191,9 +208,26 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
         
         _table[index] = new Entry { IsOccupied = false };
         Count--;
+        
+        if (LoadFactor < ShrinkThreshold && Count > MinCapacity)
+            Resize(_capacity / 2);
             
         FixCluster((index + _k) % _capacity);
         return true;
+    }
+    
+    public bool Replace(TKey key, TValue newValue)
+    {
+        var index = GetIndex(key, out _);
+
+        if (index != -1 && _table[index].IsOccupied && 
+            _table[index].Key.Equals(key))
+        {
+            _table[index].Value = newValue;
+            return true;
+        }
+
+        return false;
     }
 
     private void FixCluster(int index)
@@ -213,8 +247,11 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     
     public bool Add(TKey key, TValue value)
     {
-        if ((double)Count / _capacity >= LoadFactorThreshold)
-            Resize();
+        if (LoadFactor >= LoadFactorThreshold)
+            Resize(_capacity * 2 + 1);
+
+        if (ContainsKey(key))
+            return false;
         
         var index = GetIndex(key);
         
