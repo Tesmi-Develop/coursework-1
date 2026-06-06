@@ -7,6 +7,9 @@ namespace Coursework1.JsonConverters;
 public class FineConverter : JsonConverter<Fine>
 {
     private static readonly string[] RequiredFields = { "License", "Article", "Price", "Date" };
+    
+    private static readonly IntCustomConverter _intConverter = new();
+    private static readonly StringCustomConverter _stringConverter = new();
 
     public override Fine Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -41,14 +44,17 @@ public class FineConverter : JsonConverter<Fine>
                     license = JsonSerializer.Deserialize<DriverLicense>(ref reader, options);
                     fieldsFound++;
                     break;
+                    
                 case "Article":
-                    article = JsonSerializer.Deserialize<string>(ref reader, options);
+                    article = _stringConverter.Read(ref reader, typeof(string), options);
                     fieldsFound++;
                     break;
+                    
                 case "Price":
-                    price = JsonSerializer.Deserialize<int>(ref reader, options);
+                    price = _intConverter.Read(ref reader, typeof(int), options);
                     fieldsFound++;
                     break;
+                    
                 case "Date":
                     date = JsonSerializer.Deserialize<FormattedDate>(ref reader, options);
                     fieldsFound++;
@@ -76,10 +82,12 @@ public class FineConverter : JsonConverter<Fine>
         JsonSerializer.Serialize(writer, value.License, options);
         
         writer.WritePropertyName("Article");
-        writer.WriteStringValue(value.Article);
+        
+        _stringConverter.Write(writer, value.Article, options);
         
         writer.WritePropertyName("Price");
-        writer.WriteNumberValue(value.Price);
+        
+        _intConverter.Write(writer, value.Price, options);
         
         writer.WritePropertyName("Date");
         JsonSerializer.Serialize(writer, value.Date, options);

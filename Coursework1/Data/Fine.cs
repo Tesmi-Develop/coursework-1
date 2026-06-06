@@ -13,5 +13,6 @@ public record struct Fine
     
     [JsonConverter(typeof(IntCustomConverter))]
     public int Price { get; set; }
+    
     public FormattedDate Date { get; set; }
 }
