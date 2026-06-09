@@ -1,8 +1,6 @@
-namespace Coursework1;
-
-using System;
 using System.Collections;
-using System.Collections.Generic;
+
+namespace Coursework1.Collections;
 
 public class DynamicArray<T> : ICollection<T>
 {

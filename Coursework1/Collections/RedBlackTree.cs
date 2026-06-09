@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Coursework1;
+namespace Coursework1.Collections;
 
 public enum Color : byte { Red, Black }
 
@@ -17,7 +17,7 @@ public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
         public Node Left = null!;
         public Node Right = null!;
         public Node Parent = null!;
-        public DoubleLinkedList<TValue> Values = [];
+        public CircleList<TValue> Values = [];
 
         public Node(TKey key)
         {
@@ -539,7 +539,7 @@ public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
         return x;
     }
 
-    public bool TryFind(TKey key, [MaybeNullWhen(false)] out DoubleLinkedList<TValue> result, out int steps)
+    public bool TryFind(TKey key, [MaybeNullWhen(false)] out CircleList<TValue> result, out int steps)
     {
         result = null;
         
@@ -551,7 +551,7 @@ public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
         return true;
     }
     
-    public bool TryFind(TKey key, [MaybeNullWhen(false)] out DoubleLinkedList<TValue> result)
+    public bool TryFind(TKey key, [MaybeNullWhen(false)] out CircleList<TValue> result)
     {
         result = null;
         

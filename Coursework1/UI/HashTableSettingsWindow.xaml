@@ -1,7 +1,7 @@
 <Window x:Class="Coursework1.UI.HashTableSettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Настройки Хеш-Таблицы" 
+        Title="Настройки ХТ" 
         Height="300" Width="450"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
@@ -23,17 +23,6 @@
         
         <StackPanel Grid.Row="1">
             <TextBox x:Name="CapacityBox" Text="11" Padding="5"/>
-            <TextBlock Text="Рекомендуется простое число (например: 11, 13, 17, 19...)" 
-                       FontSize="11" Foreground="Gray" Margin="2,2,0,0"/>
-        </StackPanel>
-        
-        <TextBlock Text="Шаг пробирования (Step K):" 
-                   Grid.Row="3" FontWeight="Bold"/>
-        
-        <StackPanel Grid.Row="4">
-            <TextBox x:Name="StepBox" Text="3" Padding="5"/>
-            <TextBlock Text="Должно быть меньше Capacity и взаимно просто с ним." 
-                       FontSize="11" Foreground="Gray" Margin="2,2,0,0"/>
         </StackPanel>
         
         <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">

@@ -15,8 +15,8 @@ public partial class ReportWindow
     public ReportWindow()
     {
         InitializeComponent();
-        
-        DatePicker.SelectedDate = DateTime.Now;
+
+        DateBox.Text = new FormattedDate(DateTime.Now).ToString();
     }
     
     private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
@@ -28,9 +28,9 @@ public partial class ReportWindow
 
     private void GenerateReport_Click(object sender, RoutedEventArgs e)
     {
-        if (!DatePicker.SelectedDate.HasValue)
+        if (!FormattedDate.TryParse(DateBox.Text, out var date, out var error))
         {
-            ErrorWindow.Show(this, "Дата не выбрана");
+            ErrorWindow.Show(this, error);
             return;
         }
         
@@ -45,7 +45,7 @@ public partial class ReportWindow
         }
 
         if (!Parsers.TryParseFullName(LastNameBox.Text, FirstNameBox.Text, MiddleNameBox.Text, out var fullName,
-                out var error))
+                out error))
         {
             ErrorWindow.Show(this, error);
             return;
@@ -55,7 +55,7 @@ public partial class ReportWindow
         {
             FullName = fullName,
             Amount = amount,
-            Date = DatePicker.SelectedDate!.Value,
+            Date = date,
         };
 
         DialogResult = true;

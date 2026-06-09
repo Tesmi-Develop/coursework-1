@@ -1,6 +1,7 @@
 using Coursework1.Data;
+using Coursework1.Databases;
 
-namespace Coursework1;
+namespace Coursework1.Client;
 
 public class ClientHandler
 {
