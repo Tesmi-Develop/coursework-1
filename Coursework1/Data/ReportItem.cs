@@ -6,6 +6,6 @@ public record struct ReportItem
     public FullName FullName { get; set; }
     public VehicleCategory Categories { get; set; }
     public string Article { get; set; }
-    public int Price { get; init; }
+    public uint Price { get; init; }
     public FormattedDate Date { get; set; }
 }

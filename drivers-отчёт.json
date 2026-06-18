@@ -1,0 +1,12 @@
+[
+  { "License": "1029-384756", "FullName": "Иванов Иван Иванович", "Categories": "A, B" },
+  { "License": "1122-334455", "FullName": "Петров Петр Петрович", "Categories": "B" },
+  { "License": "2039-485761", "FullName": "Сидоров Алексей Николаевич", "Categories": "B, C" },
+  { "License": "2233-445566", "FullName": "Кузнецов Дмитрий Сергеевич", "Categories": "B" },
+  { "License": "3049-586712", "FullName": "Смирнова Елена Владимировна", "Categories": "B" },
+  { "License": "3748-592011", "FullName": "Попов Максим Андреевич", "Categories": "A, B, M" },
+  { "License": "4433-221100", "FullName": "Васильев Игорь Олегович", "Categories": "B, D" },
+  { "License": "4556-002938", "FullName": "Васильев Игорь Олегович", "Categories": "B, D" },
+  { "License": "5060-708090", "FullName": "Васильев Игорь Олегович", "Categories": "B, D" },
+  { "License": "5544-332211", "FullName": "Васильев Игорь Олегович", "Categories": "B, D" }
+]

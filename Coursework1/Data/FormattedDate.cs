@@ -5,7 +5,7 @@ using Coursework1.JsonConverters;
 namespace Coursework1.Data;
 
 [JsonConverter(typeof(FormattedDateConverter))]
-public readonly record struct FormattedDate(DateTime Value)
+public readonly record struct FormattedDate(DateTime Value) : IComparable<FormattedDate>
 {
     private static readonly string[] MonthNames = 
     { 
@@ -62,7 +62,7 @@ public readonly record struct FormattedDate(DateTime Value)
             }
         }
 
-        if (year < 1 || year > 9999)
+        if (year is < 1970 or > 2999)
         {
             error = "Недопустимый год";
             return false;
@@ -95,4 +95,9 @@ public readonly record struct FormattedDate(DateTime Value)
 
     public static implicit operator FormattedDate(DateTime dt) => new(dt);
     public static implicit operator DateTime(FormattedDate dt) => dt.Value;
+
+    public int CompareTo(FormattedDate other)
+    {
+        return Value.CompareTo(other.Value);
+    }
 }

@@ -25,7 +25,23 @@ public static class Parsers
             return true;
         }
 
-        error = "Некорректное ФИО";
+        error = "Некорректные ФИО";
+        return false;
+    }
+    
+    
+    public static bool TryParseArticle(string input, out string article, out string error)
+    {
+        article = string.Empty;
+        error = string.Empty;
+        
+        if (input.Length is >= 2 and <= 1024)
+        {
+            article = input;
+            return true;
+        }
+
+        error = "Некорректное нарушение";
         return false;
     }
     
@@ -46,7 +62,7 @@ public static class Parsers
         
         if (split.Length != 2)
         {
-            error = "Формат ВУ: 0000-000000 (серия-номер)";
+            error = "Некорректный формат ВУ. Формат ВУ: 0000-000000 (серия- номер)";
             return false;
         }
 

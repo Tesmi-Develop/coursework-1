@@ -10,9 +10,10 @@ public delegate bool FinePredicate<in T>(T obj, out string error) where T : allo
 
 public class FineDatabase : IEnumerable<Fine>
 {
-    private readonly RedBlackTree<DateTime, int> _indexesByDateTime = new();
+    private readonly RedBlackTree<FormattedDate, int> _indexesByDateTime = new();
     private readonly RedBlackTree<DriverLicense, int> _indexesByDriverLicenses = new();
     private readonly DynamicArray<Fine> _fines = [];
+    private const int MaxCapacity = 100000;
 
     public event Action<string>? LogMessage;
 
@@ -20,8 +21,17 @@ public class FineDatabase : IEnumerable<Fine>
 
     public int Count => _fines.Count;
     
-    public FineWithId Add(Fine fine)
+    public bool TryAdd(Fine fine, out FineWithId added, out string error)
     {
+        error = string.Empty;
+        added = default;
+        
+        if (_fines.Count > MaxCapacity)
+        {
+            error = $"Превышен лимит на количество записей {MaxCapacity}";
+            return false;
+        }
+        
         Log($"[ADD] {fine.License} | {fine.Date}");
         
         _fines.Add(fine);
@@ -32,7 +42,10 @@ public class FineDatabase : IEnumerable<Fine>
 
         Log($"[SUCCESS] ID: {newIndex}");
         Log(_indexesByDriverLicenses.ToVisualString());
-        return new FineWithId { Fine = fine, Id = newIndex };
+        Log(_indexesByDateTime.ToVisualString());
+        
+        added =  new FineWithId { Fine = fine, Id = newIndex };
+        return true;
     }
     
     public Fine[] CreateReport(ReportCriteria reportCriteria, Predicate<Fine> predicate)
@@ -122,6 +135,7 @@ public class FineDatabase : IEnumerable<Fine>
         _fines.RemoveAt(lastIndex);
         Log($"[SUCCESS] Remaining: {_fines.Count}");
         Log(_indexesByDriverLicenses.ToVisualString());
+        Log(_indexesByDateTime.ToVisualString());
         return true;
     }
 
@@ -156,15 +170,30 @@ public class FineDatabase : IEnumerable<Fine>
                 return false;
             }
 
-            foreach (var fine in fines) Add(fine);
+            if (fines.Length > MaxCapacity)
+            {
+                error = $"Количество записей в файле ({fines.Length}) превышает максимальную вместимость ({MaxCapacity})";
+                return false;
+            }
+            
+            foreach (var fine in fines) 
+                TryAdd(fine, out _, out _);
             
             Log("[SUCCESS] Import completed");
             Log(_indexesByDriverLicenses.ToVisualString());
+            Log(_indexesByDateTime.ToVisualString());
             return true;
         }
         catch (JsonException e)
         {
             error = $"Ошибка при десериализации JSON: строка: {e.LineNumber + 1}, позиция: {e.BytePositionInLine}: {e.Message}";
+            Log($"[ERROR] {error}");
+            return false;
+        }
+        catch (Exception e)
+        {
+            error =
+                $"Ошибка при десериализации JSON: {e.Message}";
             Log($"[ERROR] {error}");
             return false;
         }

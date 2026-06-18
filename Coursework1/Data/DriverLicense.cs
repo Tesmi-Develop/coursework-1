@@ -26,6 +26,8 @@ public readonly record struct DriverLicense : IComparable<DriverLicense>
         
         return $"{Series:D4}-{Number:D6}";
     }
+    
+    public override int GetHashCode() => _mask.GetHashCode();
 
     public int CompareTo(DriverLicense other)
     {

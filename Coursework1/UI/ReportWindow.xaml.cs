@@ -34,14 +34,10 @@ public partial class ReportWindow
             return;
         }
         
-        var amount = 0;
-        if (!string.IsNullOrWhiteSpace(MinAmountBox.Text))
+        if (string.IsNullOrWhiteSpace(MinAmountBox.Text) || !int.TryParse(MinAmountBox.Text, out var amount) || amount < 0)
         {
-            if (!int.TryParse(MinAmountBox.Text, out amount) || amount < 0)
-            {
-                ErrorWindow.Show(this, "Введите корректную сумму");
-                return;
-            }
+            ErrorWindow.Show(this, "Введите корректную сумму");
+            return;
         }
 
         if (!Parsers.TryParseFullName(LastNameBox.Text, FirstNameBox.Text, MiddleNameBox.Text, out var fullName,

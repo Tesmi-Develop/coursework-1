@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using System.Text;
 
 namespace Coursework1.Collections;
@@ -12,7 +13,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     {
         get
         {
-            for (var i = 0; i < _capacity; i++)
+            for (var i = 0; i < Capacity; i++)
             {
                 if (_table[i].IsOccupied) 
                     yield return _table[i].Key;
@@ -24,7 +25,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     {
         get
         {
-            for (var i = 0; i < _capacity; i++)
+            for (var i = 0; i < Capacity; i++)
             {
                 if (_table[i].IsOccupied) 
                     yield return _table[i].Value;
@@ -40,9 +41,9 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     }
 
     private Entry[] _table;
-    private int _capacity;
+    public int Capacity { get; private set; }
     private int _k;
-    private float LoadFactor => (float)Count / _capacity;
+    private float LoadFactor => (float)Count / Capacity;
     private const double LoadFactorThreshold = 0.7;
     private const double ShrinkThreshold = 0.2;
     private const int MinCapacity = 1; 
@@ -52,9 +53,9 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
         if (initialSize < MinCapacity)
             throw new ArgumentOutOfRangeException(nameof(initialSize));
         
-        _capacity = initialSize;
-        _k = CalculateStep(_capacity);
-        _table = new Entry[_capacity];
+        Capacity = initialSize;
+        _k = CalculateStep(Capacity);
+        _table = new Entry[Capacity];
     }
     
     private int CalculateStep(int capacity)
@@ -88,7 +89,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
 
     private int MidSquareHash(TKey key, int m)
     {
-        var hash = (ulong)Math.Abs(key.GetHashCode());
+        var hash = (ulong)key.GetHashCode() & 0xFFFFFFFF;
         var square = hash * hash;
         var middleBits = (int)((square >> 24) & 0xFFFF);
 
@@ -97,12 +98,12 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     
     private int PrimaryHash(TKey key)
     {
-        return MidSquareHash(key, _capacity);
+        return MidSquareHash(key, Capacity);
     }
     
     private int SecondaryHash(int currentIndex)
     {
-        return (currentIndex + _k) % _capacity;
+        return (currentIndex + _k) % Capacity;
     }
 
     private int GetIndex(TKey key, out int steps)
@@ -149,11 +150,11 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     private void Resize(int newSize)
     {
         var oldTable = _table;
-        var oldCapacity = _capacity;
+        var oldCapacity = Capacity;
         
-        _capacity = newSize;
-        _k = CalculateStep(_capacity);
-        _table = new Entry[_capacity];
+        Capacity = newSize;
+        _k = CalculateStep(Capacity);
+        _table = new Entry[Capacity];
         Count = 0;
         
         for (var i = 0; i < oldCapacity; i++)
@@ -161,7 +162,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
             if (!oldTable[i].IsOccupied) 
                 continue;
             
-            Add(oldTable[i].Key, oldTable[i].Value);
+            AddWithoutLoadFactor(oldTable[i].Key, oldTable[i].Value);
         }
     }
     
@@ -170,6 +171,15 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
         var index = GetIndex(key, out _);
         if (index != -1 && _table[index].IsOccupied)
             _table[index].Value = value;
+    }
+
+    public bool TrySetSize(int newSize)
+    {
+        if (newSize <= Count || newSize <= 0)
+            return false;
+
+        Resize(newSize);
+        return true;
     }
 
     public bool Remove(TKey key)
@@ -188,7 +198,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
             Count--;
             
             if (LoadFactor < ShrinkThreshold && Count > MinCapacity)
-                Resize(_capacity / 2);
+                Resize(Capacity / 2);
         
             FixCluster(SecondaryHash(index));
             return true;
@@ -210,9 +220,9 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
         Count--;
         
         if (LoadFactor < ShrinkThreshold && Count > MinCapacity)
-            Resize(_capacity / 2);
+            Resize(Capacity / 2);
             
-        FixCluster((index + _k) % _capacity);
+        FixCluster((index + _k) % Capacity);
         return true;
     }
     
@@ -241,19 +251,52 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
             Count--;
             
             Add(keyToMove, valueToMove);
-            index = (index + _k) % _capacity;
+            index = (index + _k) % Capacity;
         }
+    }
+    
+    private void AddWithoutLoadFactor(TKey key, TValue value)
+    {
+        if (ContainsKey(key)) 
+            return;
+
+        var index = GetIndex(key);
+        
+        if (index == -1 || _table[index].IsOccupied) return;
+
+        _table[index] = new Entry { Key = key, Value = value, IsOccupied = true };
+        Count++;
     }
     
     public bool Add(TKey key, TValue value)
     {
         if (LoadFactor >= LoadFactorThreshold)
-            Resize(_capacity * 2 + 1);
+            Resize(Capacity * 2 + 1);
 
         if (ContainsKey(key))
             return false;
         
         var index = GetIndex(key);
+        
+        if (index == -1 || _table[index].IsOccupied) 
+            return false;
+
+        _table[index] = new Entry { Key = key, Value = value, IsOccupied = true };
+        Count++;
+        return true;
+    }
+    
+    public bool Add(TKey key, TValue value, out int steps)
+    {
+        steps = 0;
+        
+        if (LoadFactor >= LoadFactorThreshold)
+            Resize(Capacity * 2 + 1);
+
+        if (ContainsKey(key))
+            return false;
+        
+        var index = GetIndex(key, out steps);
         
         if (index == -1 || _table[index].IsOccupied) 
             return false;
@@ -298,7 +341,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     
     public void Clear()
     {
-        _table = new Entry[_capacity];
+        _table = new Entry[Capacity];
         Count = 0;
     }
     
@@ -315,7 +358,7 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     
     public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
     {
-        for (var i = 0; i < _capacity; i++)
+        for (var i = 0; i < Capacity; i++)
             if (_table[i].IsOccupied)
                 yield return new KeyValuePair<TKey, TValue>(_table[i].Key, _table[i].Value);
     }
@@ -328,27 +371,27 @@ public class HashTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> w
     public string PrintDebugInfo()
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"--- Hash Table Debug Dump ---");
-        sb.AppendLine($"Capacity: {_capacity}, Count: {Count}, Load Factor: {(double)Count/_capacity:F2}");
+        sb.AppendLine("--- Hash Table Debug Dump ---");
+        sb.AppendLine($"Capacity: {Capacity}, Count: {Count}, Load Factor: {LoadFactor:F2}");
         sb.AppendLine($"Hash Function: MidSquare, Step (K): {_k}");
-        sb.AppendLine($"--------------------------------");
+        sb.AppendLine("--------------------------------");
         sb.AppendLine($"{"Index", -8} | {"Status", -10} | {"Key", -20} | {"First hash index", -10} | {"Steps", -5}");
         sb.AppendLine(new string('-', 60));
 
-        for (var i = 0; i < _capacity; i++)
+        for (var i = 0; i < Capacity; i++)
         {
             if (_table[i].IsOccupied)
             {
                 var key = _table[i].Key;
-                var firstHashIndex = MidSquareHash(key, _capacity);
+                var firstHashIndex = PrimaryHash(key);
                 
                 var steps = 0;
                 var curr = firstHashIndex;
                 while (curr != i)
                 {
                     steps++;
-                    curr = (curr + _k) % _capacity;
-                    if (steps > _capacity) 
+                    curr = SecondaryHash(curr);
+                    if (steps > Capacity) 
                         break; 
                 }
 

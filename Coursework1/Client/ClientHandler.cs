@@ -74,26 +74,20 @@ public class ClientHandler
         
         FullUpdateFines?.Invoke(fines);
     }
-    
-    public void AddDrivers(Driver[] drivers)
-    {
-        foreach (var driver in drivers)
-            AddDriver(driver);
-    }
 
     public IEnumerable<Driver> GetAllDrivers()
     {
         return _driverDatabase.GetAllDrivers();
     }
 
-    public bool TrySetHashTableSettings(int capacity)
+    public bool TrySetHashTableSettings(int capacity, out string error)
     {
-        return _driverDatabase.TrySetSettings(capacity);
+        return _driverDatabase.TrySetSettings(capacity, out error);
     }
     
-    public bool AddDriver(Driver driver)
+    public bool TryAddDriver(Driver driver, out string error)
     {
-        if (!_driverDatabase.TryAdd(driver))
+        if (!_driverDatabase.TryAdd(driver, out error))
             return false;
         
         if (!_isEnabledSearchInDrivers)
@@ -102,10 +96,22 @@ public class ClientHandler
         return true;
     }
     
-    public void RemoveDrivers(Driver[] drivers)
+    public bool TryRemoveDrivers(Driver[] drivers, out string error)
     {
+        error = string.Empty;
+        var hasError = false;
+
         foreach (var driver in drivers)
-            RemoveDriver(driver.License);
+        {
+            var success = TryRemoveDriver(driver.License);
+            if (!success && !hasError)
+            {
+                hasError = true;
+                error = $"Нельзя удалить водителя c ВУ: {driver.License} пока у него есть штрафы";
+            }
+        }
+        
+        return !hasError;
     }
 
     public bool HasFine(DriverLicense license)
@@ -113,23 +119,31 @@ public class ClientHandler
         return _fineDatabase.HasLicense(license);
     }
 
-    public void RemoveDriver(DriverLicense license)
+    public bool TryRemoveDriver(DriverLicense license)
     {
         if (_fineDatabase.HasLicense(license) || !_driverDatabase.Remove(license, out var driver, out var replacer))
-            return;
+            return false;
 
         if (_isEnabledSearchInDrivers)
             replacer = null;
         
         DriverRemoved?.Invoke(driver, replacer);
+        return true;
     }
 
-    public bool AddFine(Fine fine)
+    public bool TryAddFine(Fine fine, out string error)
     {
+        error = string.Empty;
+
         if (!_driverDatabase.Has(fine.License))
+        {
+            error = $"Водителя с ВУ: {fine.License} не существует в базе";
+            return false;
+        }
+
+        if (!_fineDatabase.TryAdd(fine, out var result, out error))
             return false;
         
-        var result = _fineDatabase.Add(fine);
         if (!_isEnabledSearchInFines)
         {
             FineAdded?.Invoke(result);

@@ -8,7 +8,7 @@ public class FineConverter : JsonConverter<Fine>
 {
     private static readonly string[] RequiredFields = { "License", "Article", "Price", "Date" };
     
-    private static readonly IntCustomConverter _intConverter = new();
+    private static readonly UIntCustomConverter UIntConverter = new();
     private static readonly StringCustomConverter _stringConverter = new();
 
     public override Fine Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -18,7 +18,7 @@ public class FineConverter : JsonConverter<Fine>
         
         DriverLicense? license = null;
         string? article = null;
-        int? price = null;
+        uint? price = null;
         FormattedDate? date = null;
         
         var fieldsFound = 0;
@@ -29,12 +29,12 @@ public class FineConverter : JsonConverter<Fine>
                 break;
 
             if (reader.TokenType != JsonTokenType.PropertyName)
-                throw new JsonException("Ожидалось название свойства.");
+                throw new JsonException("Ожидалось название свойства");
 
             var propertyName = reader.GetString();
             
             if (!RequiredFields.Contains(propertyName))
-                throw new JsonException($"Обнаружено лишнее или неверное поле: '{propertyName}'. Разрешены только: License, Article, Price, Date.");
+                throw new JsonException($"Обнаружено лишнее или неверное поле: '{propertyName}'. Разрешены только: License, Article, Price, Date");
 
             reader.Read();
 
@@ -51,7 +51,7 @@ public class FineConverter : JsonConverter<Fine>
                     break;
                     
                 case "Price":
-                    price = _intConverter.Read(ref reader, typeof(int), options);
+                    price = UIntConverter.Read(ref reader, typeof(uint), options);
                     fieldsFound++;
                     break;
                     
@@ -87,7 +87,7 @@ public class FineConverter : JsonConverter<Fine>
         
         writer.WritePropertyName("Price");
         
-        _intConverter.Write(writer, value.Price, options);
+        UIntConverter.Write(writer, value.Price, options);
         
         writer.WritePropertyName("Date");
         JsonSerializer.Serialize(writer, value.Date, options);

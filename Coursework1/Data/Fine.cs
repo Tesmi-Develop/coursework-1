@@ -11,8 +11,8 @@ public record struct Fine
     [JsonConverter(typeof(StringCustomConverter))]
     public string Article { get; set; }
     
-    [JsonConverter(typeof(IntCustomConverter))]
-    public int Price { get; set; }
+    [JsonConverter(typeof(UIntCustomConverter))]
+    public uint Price { get; set; }
     
     public FormattedDate Date { get; set; }
 }

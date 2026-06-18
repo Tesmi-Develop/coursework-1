@@ -17,8 +17,7 @@
                  HorizontalAlignment="Stretch"/>
 
         <TextBlock Text="Дата:" Grid.Row="1" VerticalAlignment="Center" Margin="0,5"/>
-        <DatePicker x:Name="ViolationDatePicker" Grid.Row="1" Grid.Column="1" Margin="10,5" 
-                    HorizontalAlignment="Stretch"/>
+        <TextBox x:Name="DateBox" Grid.Row="1" Grid.Column="1" Margin="10,5" Padding="3" HorizontalAlignment="Stretch" />
 
         <TextBlock Text="Сумма (₽):" Grid.Row="2" VerticalAlignment="Center" Margin="0,5"/>
         <TextBox x:Name="AmountBox" Grid.Row="2" Grid.Column="1" Margin="10,5" Padding="3" 

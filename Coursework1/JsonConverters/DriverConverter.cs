@@ -11,7 +11,7 @@ public class DriverConverter : JsonConverter<Driver>
     public override Driver Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
-            throw new JsonException("Ожидался объект водителеля.");
+            throw new JsonException("Ожидался объект водителя");
         
         DriverLicense? license = null;
         FullName? fullName = null;
@@ -25,12 +25,12 @@ public class DriverConverter : JsonConverter<Driver>
                 break;
 
             if (reader.TokenType != JsonTokenType.PropertyName)
-                throw new JsonException("Ожидалось название свойства.");
+                throw new JsonException("Ожидалось название свойства");
 
             var propertyName = reader.GetString();
             
             if (!RequiredFields.Contains(propertyName))
-                throw new JsonException($"Обнаружено лишнее или неверное поле: '{propertyName}'. Разрешены только: License, FullName, Categories.");
+                throw new JsonException($"Обнаружено лишнее или неверное поле: '{propertyName}'. Разрешены только: License, FullName, Categories");
 
             reader.Read();
 
@@ -52,7 +52,7 @@ public class DriverConverter : JsonConverter<Driver>
         }
         
         if (fieldsFound != 3)
-            throw new JsonException($"Неверная структура объекта. Найдено полей: {fieldsFound}, а должно быть 3 (License, FullName, Categories).");
+            throw new JsonException($"Неверная структура объекта. Найдено полей: {fieldsFound}, а должно быть 3 (License, FullName, Categories)");
 
         return new Driver
         {

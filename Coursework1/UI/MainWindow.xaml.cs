@@ -160,8 +160,9 @@ public partial class MainWindow
 
         if (addWindow.ShowDialog() != true || !addWindow.IsSuccess)
             return;
-        
-        AddDriver(addWindow.CreatedDriver!.Value);
+
+        if (!TryAddDriver(addWindow.CreatedDriver!.Value, out var error))
+            ErrorWindow.Show(this, error);
     }
 
     private bool ValidateDriverLicense(DriverLicense license)
@@ -169,14 +170,14 @@ public partial class MainWindow
         return _clientHandler.HasDriver(license);
     }
 
-    private void AddDriver(Driver driver)
+    private bool TryAddDriver(Driver driver, out string error)
     {
-        _clientHandler.AddDriver(driver);
+        return _clientHandler.TryAddDriver(driver, out error);
     }
 
-    private void AddFine(Fine fine)
+    private bool TryAddFine(Fine fine, out string error)
     {
-        _clientHandler.AddFine(fine);
+        return _clientHandler.TryAddFine(fine, out error);
     }
 
     public void RemoveDrivers_Click(object sender, RoutedEventArgs e)
@@ -185,13 +186,8 @@ public partial class MainWindow
         if (selectedDrivers.Length <= 0)
             return;
 
-        if (selectedDrivers.Length == 1 && _clientHandler.HasFine(selectedDrivers[0].License))
-        {
-            ErrorWindow.Show(this, "Нельзя удалить водителя пока у него есть штрафы");
-            return;
-        }
-        
-        _clientHandler.RemoveDrivers(selectedDrivers);
+        if (!_clientHandler.TryRemoveDrivers(selectedDrivers, out var error))
+            ErrorWindow.Show(this, error);
     }
 
     public void FindDriver_Click(object sender, RoutedEventArgs e)
@@ -219,10 +215,8 @@ public partial class MainWindow
         if (settingsWindow.ShowDialog() != true || !settingsWindow.IsSuccess)
             return;
 
-        if (!_clientHandler.TrySetHashTableSettings(settingsWindow.Capacity))
-        {
-            ErrorWindow.Show(this,"Нельзя задать параметры ХТ когда есть записи");
-        }
+        if (!_clientHandler.TrySetHashTableSettings(settingsWindow.Capacity, out var error))
+            ErrorWindow.Show(this, error);
     }
     
     public void AddFine_Click(object sender, RoutedEventArgs e)
@@ -235,7 +229,8 @@ public partial class MainWindow
         if (addWindow.ShowDialog() != true || !addWindow.IsSuccess)
             return;
         
-        AddFine(addWindow.CreatedFine!.Value);
+        if (!TryAddFine(addWindow.CreatedFine!.Value, out var error))
+            ErrorWindow.Show(this, error);
     }
 
     public void RemoveFines_Click(object sender, RoutedEventArgs e)

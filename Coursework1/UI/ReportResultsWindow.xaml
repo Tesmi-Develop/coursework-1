@@ -44,7 +44,7 @@
                                     Binding="{Binding FullName}" 
                                     Width="2*"/>
 
-                <DataGridTextColumn Header="Категория" 
+                <DataGridTextColumn Header="Категории" 
                                     Binding="{Binding Categories}" 
                                     Width="Auto"
                                     MinWidth="70"

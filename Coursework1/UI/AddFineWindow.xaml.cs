@@ -18,7 +18,7 @@ public partial class AddFineWindow : Window
         _validateDriverLicense = validateDriverLicense;
         InitializeComponent();
         DataContext = this;
-        ViolationDatePicker.SelectedDate = DateTime.Now;
+        DateBox.Text = new FormattedDate(DateTime.Now).ToString();
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -29,19 +29,25 @@ public partial class AddFineWindow : Window
             return;
         }
         
-        if (!ViolationDatePicker.SelectedDate.HasValue)
+        if (!FormattedDate.TryParse(DateBox.Text, out var date, out var error))
         {
-            ErrorWindow.Show(this, "Выберите дату нарушения");
+            ErrorWindow.Show(this, error);
             return;
         }
         
-        if (!int.TryParse(AmountBox.Text, out var amount) || amount <= 0)
+        if (!uint.TryParse(AmountBox.Text, out var amount) || amount <= 0)
         {
             ErrorWindow.Show(this, "Введите корректную сумму штрафа");
             return;
         }
 
-        if (!Parsers.TryParseLicense(VuBox.Text, out var license, out var error))
+        if (!Parsers.TryParseArticle(ViolationTitleBox.Text, out var article, out error))
+        {
+            ErrorWindow.Show(this, error);
+            return;
+        }
+
+        if (!Parsers.TryParseLicense(VuBox.Text, out var license, out error))
         {
             ErrorWindow.Show(this, error);
             return;
@@ -56,9 +62,9 @@ public partial class AddFineWindow : Window
         CreatedFine = new Fine
         {
             License = license,
-            Article = ViolationTitleBox.Text,
+            Article = article,
             Price = amount,
-            Date = ViolationDatePicker.SelectedDate.Value
+            Date = date
         };
         DialogResult = true;
     }

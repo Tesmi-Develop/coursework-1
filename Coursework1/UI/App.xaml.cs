@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Coursework1.Client;
+using Coursework1.Collections;
 using Coursework1.Databases;
 
 namespace Coursework1.UI;

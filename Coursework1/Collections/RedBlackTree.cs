@@ -5,7 +5,7 @@ namespace Coursework1.Collections;
 
 public enum Color : byte { Red, Black }
 
-public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
+public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey> where TValue : IComparable<TValue>
 {
     private readonly Node _nil;
     private Node _root;
@@ -38,40 +38,39 @@ public class RedBlackTree<TKey, TValue> where TKey : IComparable<TKey>
             return "Tree is empty";
 
         var sb = new StringBuilder();
-        BuildString(_root, sb, "", true, true);
+        sb.AppendLine();
+        BuildString(_root, sb);
         return sb.ToString();
     }
 
-    private void BuildString(Node node, StringBuilder sb, string indent, bool isLeft, bool isRoot)
+    private void BuildString(Node node, StringBuilder sb, string prefix = "", bool isLeft = false, bool isRoot = true)
     {
         if (node == _nil)
             return;
-
+        
         if (node.Right != _nil)
         {
-            BuildString(node.Right, sb, indent + (isLeft && !isRoot ? "│   " : "    "), false, false);
+            var rightPrefix = prefix + (isRoot ? "" : (isLeft ? "│   " : "    "));
+            BuildString(node.Right, sb, rightPrefix, false, false);
         }
-
-        sb.Append(indent);
-    
-        if (!isRoot)
-        {
-            sb.Append(isLeft ? "└── " : "┌── ");
-        }
-        else
-        {
-            sb.Append("─── ");
-        }
-
-        var valuesList = string.Join(", ", node.Values.AsEnumerable());
-        var colorMark = node.Color == Color.Red ? "R" : "B";
-
-        sb.AppendLine($"[{colorMark}] {node.Key}: {{{valuesList}}}");
         
-        if (node.Left != _nil)
-        {
-            BuildString(node.Left, sb, indent + (!isLeft || isRoot ? "    " : "│   "), true, false);
-        }
+        var valuesList = string.Join(", ", node.Values);
+        var colorMark = node.Color == Color.Red ? "R" : "B";
+    
+        sb.Append(prefix);
+        
+        if (!isRoot)
+            sb.Append(isLeft ? "└── " : "┌── ");
+        else
+            sb.Append("─── ");
+        
+        sb.AppendLine($"[{colorMark}] {node.Key}: {{{valuesList}}}");
+
+        if (node.Left == _nil) 
+            return;
+        
+        var leftPrefix = prefix + (isRoot ? "" : (isLeft ? "    " : "│   "));
+        BuildString(node.Left, sb, leftPrefix, true, false);
     }
 
     public List<Node> RightLeftTraversal()

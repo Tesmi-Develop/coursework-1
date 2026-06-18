@@ -12,21 +12,31 @@ public class DriverDatabase
 
     private HashTable<DriverLicense, int> _indexesByLicense = new();
     private readonly DynamicArray<Driver> _drivers = [];
+    private const int MaxCapacity = 100000;
 
     private void Log(string message)
     {
         LogMessage?.Invoke(message);
     }
 
-    public bool TrySetSettings(int capacity)
+    public bool TrySetSettings(int capacity, out string error)
     {
-        if (_drivers.Count > 0)
+        error = string.Empty;
+
+        if (capacity > MaxCapacity)
+        {
+            error = $"Заданный размер ({capacity}) превышает максимальный лимит ({MaxCapacity})";
             return false;
+        }
         
-        var oldHashTable = _indexesByLicense;
-        _indexesByLicense = new HashTable<DriverLicense, int>(capacity);
+        if (!_indexesByLicense.TrySetSize(capacity))
+        {
+            error = $"Невозможно применить размер: {capacity}. Минимально возможный размер: {Math.Max(_indexesByLicense.Count + 1, 1)}";
+            return false;
+        }
         
         Log($"[INIT] Успешно применены настройки для ХТ: capacity = {capacity}");
+        Log(_indexesByLicense.PrintDebugInfo());
         return true;
     }
 
@@ -35,13 +45,23 @@ public class DriverDatabase
         return _indexesByLicense.ContainsKey(license);
     }
 
-    public bool TryAdd(Driver driver)
+    public bool TryAdd(Driver driver, out string error)
     {
+        error = string.Empty;
+        
+        if (_indexesByLicense.Count > MaxCapacity)
+        {
+            Log($"[FAIL] Превышен лимит на количество записей {MaxCapacity}");
+            error = $"Превышен лимит на количество записей {MaxCapacity}";
+            return false;
+        }
+        
         Log($"[ADD] Попытка добавления: {driver.License}");
         
         if (_indexesByLicense.ContainsKey(driver.License))
         {
-            Log($"[FAIL] Ключ {driver.License} уже существует.");
+            Log($"[FAIL] Ключ {driver.License} уже существует");
+            error = $"Ключ {driver.License} уже существует";
             return false;
         }
         
@@ -56,6 +76,7 @@ public class DriverDatabase
         }
         
         Log("[ERROR] Ошибка добавления (таблица полна или конфликт).");
+        error = "Ошибка добавления (таблица полна или конфликт)";
         return false;
     }
 
@@ -186,7 +207,20 @@ public class DriverDatabase
         }
         catch (JsonException e)
         {
-            error = $"Ошибка при десериализации JSON: строка: {e.LineNumber + 1}, позиция: {e.BytePositionInLine}: {e.Message}";
+            error =
+                $"Ошибка при десериализации JSON: строка: {e.LineNumber + 1}, позиция: {e.BytePositionInLine}: {e.Message}";
+            return false;
+        }
+        catch (Exception e)
+        {
+            error =
+                $"Ошибка при десериализации JSON: {e.Message}";
+            return false;
+        }
+
+        if (drivers.Length > MaxCapacity)
+        {
+            error = $"Количество записей в файле ({drivers.Length}) превышает максимальную вместимость ({MaxCapacity})";
             return false;
         }
         
